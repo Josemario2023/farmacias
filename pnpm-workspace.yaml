@@ -1,5 +1,10 @@
-﻿packages:
+packages:
   - "gateway"
   - "services/*"
   - "libs/*"
   - "frontend"
+allowBuilds:
+  '@parcel/watcher': true
+  bcrypt: true
+  oracledb: true
+  unrs-resolver: true
