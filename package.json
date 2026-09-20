@@ -1,0 +1,7 @@
+﻿{
+  "name": "farmacias",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema integral de farmacias - monorepo",
+  "packageManager": "pnpm@11.1.2"
+}
