@@ -7,6 +7,7 @@ import { AppService } from "./app.service";
 import { Usuario } from "./usuarios/usuario.entity";
 import { UsuariosModule } from "./usuarios/usuarios.module";
 import { AuthModule } from "./auth/auth.module";
+import { OtpCodigo } from "./auth/otp-codigo.entity";
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { AuthModule } from "./auth/auth.module";
         serviceName: config.get<string>("DB_SERVICE"),
         username: config.get<string>("DB_USER"),
         password: config.get<string>("DB_PASSWORD"),
-        entities: [Usuario],
+        entities: [Usuario,OtpCodigo],
         synchronize: false,
       }),
     }),
@@ -39,8 +40,7 @@ import { AuthModule } from "./auth/auth.module";
       },
     ]),
     UsuariosModule,
-    AuthModule,
-  ],
+    AuthModule,  ],
   controllers: [AppController],
   providers: [AppService],
 })

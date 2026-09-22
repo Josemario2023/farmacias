@@ -32,6 +32,13 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: farmacias-mailhog
+    ports:
+      - "1025:1025"     # puerto SMTP (por donde users enviara los correos)
+      - "8025:8025"     # panel web (para que TU veas los correos capturados)  
 volumes:
   oracle-data:
   sqlserver-data:
