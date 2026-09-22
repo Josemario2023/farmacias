@@ -21,7 +21,18 @@ services:
       MSSQL_PID: "Developer"
     volumes:
       - sqlserver-data:/var/opt/mssql
-
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: farmacias-rabbitmq
+    ports:
+      - "5672:5672"     # puerto de mensajeria (por donde hablan los servicios)
+      - "15672:15672"   # panel de administracion web (para ti, en el navegador)
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
 volumes:
   oracle-data:
   sqlserver-data:
+  rabbitmq-data:

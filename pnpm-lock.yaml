@@ -21,7 +21,7 @@ importers:
         version: 12.0.0(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(rxjs@7.8.2)
       '@nestjs/core':
         specifier: ^12.0.1
-        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@12.0.3)(@nestjs/platform-express@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/jwt':
         specifier: ^12.0.2
         version: 12.0.2(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
@@ -61,7 +61,7 @@ importers:
         version: 12.0.3(chokidar@5.0.0)(prettier@3.9.8)(typescript@6.0.3)
       '@nestjs/testing':
         specifier: ^12.0.1
-        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(@nestjs/platform-express@12.0.3)
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(@nestjs/microservices@12.0.3)(@nestjs/platform-express@12.0.3)
       '@types/express':
         specifier: ^5.0.0
         version: 5.0.6
@@ -69,7 +69,7 @@ importers:
         specifier: ^30.0.0
         version: 30.0.0
       '@types/node':
-        specifier: ^24.0.0
+        specifier: ^24.13.6
         version: 24.13.6
       '@types/passport-jwt':
         specifier: ^4.0.1
@@ -113,6 +113,500 @@ importers:
 
   libs/contracts: {}
 
+  services/audit:
+    dependencies:
+      '@nestjs/common':
+        specifier: ^12.0.1
+        version: 12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/config':
+        specifier: ^12.0.0
+        version: 12.0.0(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(rxjs@7.8.2)
+      '@nestjs/core':
+        specifier: ^12.0.1
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@12.0.3)(@nestjs/platform-express@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/microservices':
+        specifier: ^12.0.3
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(amqp-connection-manager@5.0.0(amqplib@2.0.1))(amqplib@2.0.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/platform-express':
+        specifier: ^12.0.1
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)
+      '@nestjs/typeorm':
+        specifier: ^12.0.1
+        version: 12.0.1(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@1.1.1(oracledb@7.0.1)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3)))
+      amqp-connection-manager:
+        specifier: ^5.0.0
+        version: 5.0.0(amqplib@2.0.1)
+      amqplib:
+        specifier: ^2.0.1
+        version: 2.0.1
+      dotenv:
+        specifier: ^18.0.1
+        version: 18.0.1
+      oracledb:
+        specifier: ^7.0.1
+        version: 7.0.1
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.2
+      typeorm:
+        specifier: ^1.1.1
+        version: 1.1.1(oracledb@7.0.1)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3))
+    devDependencies:
+      '@nestjs/cli':
+        specifier: ^12.0.0
+        version: 12.0.3(@types/node@24.13.6)(prettier@3.9.8)(ts-loader@9.6.2(typescript@6.0.3)(webpack@5.111.1))(webpack@5.111.1)
+      '@nestjs/mau':
+        specifier: ^0.2.6
+        version: 0.2.8
+      '@nestjs/schematics':
+        specifier: ^12.0.0
+        version: 12.0.3(chokidar@5.0.0)(prettier@3.9.8)(typescript@6.0.3)
+      '@nestjs/testing':
+        specifier: ^12.0.1
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(@nestjs/microservices@12.0.3)(@nestjs/platform-express@12.0.3)
+      '@types/express':
+        specifier: ^5.0.0
+        version: 5.0.6
+      '@types/jest':
+        specifier: ^30.0.0
+        version: 30.0.0
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.6
+      '@types/supertest':
+        specifier: ^7.0.0
+        version: 7.2.1
+      jest:
+        specifier: ^30.0.0
+        version: 30.5.2(@types/node@24.13.6)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3))
+      oxlint:
+        specifier: ^1.58.0
+        version: 1.83.0(oxlint-tsgolint@7.0.2002)
+      oxlint-tsgolint:
+        specifier: ^7.0.2001
+        version: 7.0.2002
+      prettier:
+        specifier: ^3.4.2
+        version: 3.9.8
+      source-map-support:
+        specifier: ^0.5.21
+        version: 0.5.21
+      supertest:
+        specifier: ^7.0.0
+        version: 7.2.2
+      ts-jest:
+        specifier: ^29.4.0
+        version: 29.4.12(@babel/core@7.29.7)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.7))(jest-util@30.5.1)(jest@30.5.2(@types/node@24.13.6)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3)))(typescript@6.0.3)
+      ts-loader:
+        specifier: ^9.5.2
+        version: 9.6.2(typescript@6.0.3)(webpack@5.111.1)
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@24.13.6)(typescript@6.0.3)
+      tsconfig-paths:
+        specifier: ^4.2.0
+        version: 4.2.0
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.3
+
+  services/billing:
+    dependencies:
+      '@nestjs/common':
+        specifier: ^12.0.1
+        version: 12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/config':
+        specifier: ^12.0.0
+        version: 12.0.0(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(rxjs@7.8.2)
+      '@nestjs/core':
+        specifier: ^12.0.1
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@12.0.3)(@nestjs/platform-express@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/microservices':
+        specifier: ^12.0.3
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(amqp-connection-manager@5.0.0(amqplib@2.0.1))(amqplib@2.0.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/platform-express':
+        specifier: ^12.0.1
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)
+      '@nestjs/typeorm':
+        specifier: ^12.0.1
+        version: 12.0.1(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@1.1.1(oracledb@7.0.1)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3)))
+      amqp-connection-manager:
+        specifier: ^5.0.0
+        version: 5.0.0(amqplib@2.0.1)
+      amqplib:
+        specifier: ^2.0.1
+        version: 2.0.1
+      oracledb:
+        specifier: ^7.0.1
+        version: 7.0.1
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.2
+      typeorm:
+        specifier: ^1.1.1
+        version: 1.1.1(oracledb@7.0.1)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3))
+    devDependencies:
+      '@nestjs/cli':
+        specifier: ^12.0.0
+        version: 12.0.3(@types/node@24.13.6)(prettier@3.9.8)(ts-loader@9.6.2(typescript@6.0.3)(webpack@5.111.1))(webpack@5.111.1)
+      '@nestjs/mau':
+        specifier: ^0.2.6
+        version: 0.2.8
+      '@nestjs/schematics':
+        specifier: ^12.0.0
+        version: 12.0.3(chokidar@5.0.0)(prettier@3.9.8)(typescript@6.0.3)
+      '@nestjs/testing':
+        specifier: ^12.0.1
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(@nestjs/microservices@12.0.3)(@nestjs/platform-express@12.0.3)
+      '@types/express':
+        specifier: ^5.0.0
+        version: 5.0.6
+      '@types/jest':
+        specifier: ^30.0.0
+        version: 30.0.0
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.6
+      '@types/supertest':
+        specifier: ^7.0.0
+        version: 7.2.1
+      jest:
+        specifier: ^30.0.0
+        version: 30.5.2(@types/node@24.13.6)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3))
+      oxlint:
+        specifier: ^1.58.0
+        version: 1.83.0(oxlint-tsgolint@7.0.2002)
+      oxlint-tsgolint:
+        specifier: ^7.0.2001
+        version: 7.0.2002
+      prettier:
+        specifier: ^3.4.2
+        version: 3.9.8
+      source-map-support:
+        specifier: ^0.5.21
+        version: 0.5.21
+      supertest:
+        specifier: ^7.0.0
+        version: 7.2.2
+      ts-jest:
+        specifier: ^29.4.0
+        version: 29.4.12(@babel/core@7.29.7)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.7))(jest-util@30.5.1)(jest@30.5.2(@types/node@24.13.6)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3)))(typescript@6.0.3)
+      ts-loader:
+        specifier: ^9.5.2
+        version: 9.6.2(typescript@6.0.3)(webpack@5.111.1)
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@24.13.6)(typescript@6.0.3)
+      tsconfig-paths:
+        specifier: ^4.2.0
+        version: 4.2.0
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.3
+
+  services/cash:
+    dependencies:
+      '@nestjs/common':
+        specifier: ^12.0.1
+        version: 12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/config':
+        specifier: ^12.0.0
+        version: 12.0.0(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(rxjs@7.8.2)
+      '@nestjs/core':
+        specifier: ^12.0.1
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@12.0.3)(@nestjs/platform-express@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/microservices':
+        specifier: ^12.0.3
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(amqp-connection-manager@5.0.0(amqplib@2.0.1))(amqplib@2.0.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/platform-express':
+        specifier: ^12.0.1
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)
+      '@nestjs/typeorm':
+        specifier: ^12.0.1
+        version: 12.0.1(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@1.1.1(oracledb@7.0.1)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3)))
+      amqp-connection-manager:
+        specifier: ^5.0.0
+        version: 5.0.0(amqplib@2.0.1)
+      amqplib:
+        specifier: ^2.0.1
+        version: 2.0.1
+      dotenv:
+        specifier: ^18.0.1
+        version: 18.0.1
+      oracledb:
+        specifier: ^7.0.1
+        version: 7.0.1
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.2
+      typeorm:
+        specifier: ^1.1.1
+        version: 1.1.1(oracledb@7.0.1)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3))
+    devDependencies:
+      '@nestjs/cli':
+        specifier: ^12.0.0
+        version: 12.0.3(@types/node@24.13.6)(prettier@3.9.8)(ts-loader@9.6.2(typescript@6.0.3)(webpack@5.111.1))(webpack@5.111.1)
+      '@nestjs/mau':
+        specifier: ^0.2.6
+        version: 0.2.8
+      '@nestjs/schematics':
+        specifier: ^12.0.0
+        version: 12.0.3(chokidar@5.0.0)(prettier@3.9.8)(typescript@6.0.3)
+      '@nestjs/testing':
+        specifier: ^12.0.1
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(@nestjs/microservices@12.0.3)(@nestjs/platform-express@12.0.3)
+      '@types/express':
+        specifier: ^5.0.0
+        version: 5.0.6
+      '@types/jest':
+        specifier: ^30.0.0
+        version: 30.0.0
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.6
+      '@types/supertest':
+        specifier: ^7.0.0
+        version: 7.2.1
+      jest:
+        specifier: ^30.0.0
+        version: 30.5.2(@types/node@24.13.6)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3))
+      oxlint:
+        specifier: ^1.58.0
+        version: 1.83.0(oxlint-tsgolint@7.0.2002)
+      oxlint-tsgolint:
+        specifier: ^7.0.2001
+        version: 7.0.2002
+      prettier:
+        specifier: ^3.4.2
+        version: 3.9.8
+      source-map-support:
+        specifier: ^0.5.21
+        version: 0.5.21
+      supertest:
+        specifier: ^7.0.0
+        version: 7.2.2
+      ts-jest:
+        specifier: ^29.4.0
+        version: 29.4.12(@babel/core@7.29.7)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.7))(jest-util@30.5.1)(jest@30.5.2(@types/node@24.13.6)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3)))(typescript@6.0.3)
+      ts-loader:
+        specifier: ^9.5.2
+        version: 9.6.2(typescript@6.0.3)(webpack@5.111.1)
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@24.13.6)(typescript@6.0.3)
+      tsconfig-paths:
+        specifier: ^4.2.0
+        version: 4.2.0
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.3
+
+  services/inventory:
+    dependencies:
+      '@nestjs/common':
+        specifier: ^12.0.1
+        version: 12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/config':
+        specifier: ^12.0.0
+        version: 12.0.0(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(rxjs@7.8.2)
+      '@nestjs/core':
+        specifier: ^12.0.1
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@12.0.3)(@nestjs/platform-express@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/microservices':
+        specifier: ^12.0.3
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(amqp-connection-manager@5.0.0(amqplib@2.0.1))(amqplib@2.0.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/platform-express':
+        specifier: ^12.0.1
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)
+      '@nestjs/typeorm':
+        specifier: ^12.0.1
+        version: 12.0.1(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@1.1.1(oracledb@7.0.1)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3)))
+      amqp-connection-manager:
+        specifier: ^5.0.0
+        version: 5.0.0(amqplib@2.0.1)
+      amqplib:
+        specifier: ^2.0.1
+        version: 2.0.1
+      dotenv:
+        specifier: ^18.0.1
+        version: 18.0.1
+      oracledb:
+        specifier: ^7.0.1
+        version: 7.0.1
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.2
+      typeorm:
+        specifier: ^1.1.1
+        version: 1.1.1(oracledb@7.0.1)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3))
+    devDependencies:
+      '@nestjs/cli':
+        specifier: ^12.0.0
+        version: 12.0.3(@types/node@24.13.6)(prettier@3.9.8)(ts-loader@9.6.2(typescript@6.0.3)(webpack@5.111.1))(webpack@5.111.1)
+      '@nestjs/mau':
+        specifier: ^0.2.6
+        version: 0.2.8
+      '@nestjs/schematics':
+        specifier: ^12.0.0
+        version: 12.0.3(chokidar@5.0.0)(prettier@3.9.8)(typescript@6.0.3)
+      '@nestjs/testing':
+        specifier: ^12.0.1
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(@nestjs/microservices@12.0.3)(@nestjs/platform-express@12.0.3)
+      '@types/express':
+        specifier: ^5.0.0
+        version: 5.0.6
+      '@types/jest':
+        specifier: ^30.0.0
+        version: 30.0.0
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.6
+      '@types/supertest':
+        specifier: ^7.0.0
+        version: 7.2.1
+      jest:
+        specifier: ^30.0.0
+        version: 30.5.2(@types/node@24.13.6)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3))
+      oxlint:
+        specifier: ^1.58.0
+        version: 1.83.0(oxlint-tsgolint@7.0.2002)
+      oxlint-tsgolint:
+        specifier: ^7.0.2001
+        version: 7.0.2002
+      prettier:
+        specifier: ^3.4.2
+        version: 3.9.8
+      source-map-support:
+        specifier: ^0.5.21
+        version: 0.5.21
+      supertest:
+        specifier: ^7.0.0
+        version: 7.2.2
+      ts-jest:
+        specifier: ^29.4.0
+        version: 29.4.12(@babel/core@7.29.7)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.7))(jest-util@30.5.1)(jest@30.5.2(@types/node@24.13.6)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3)))(typescript@6.0.3)
+      ts-loader:
+        specifier: ^9.5.2
+        version: 9.6.2(typescript@6.0.3)(webpack@5.111.1)
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@24.13.6)(typescript@6.0.3)
+      tsconfig-paths:
+        specifier: ^4.2.0
+        version: 4.2.0
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.3
+
+  services/pos:
+    dependencies:
+      '@nestjs/common':
+        specifier: ^12.0.1
+        version: 12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/config':
+        specifier: ^12.0.0
+        version: 12.0.0(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(rxjs@7.8.2)
+      '@nestjs/core':
+        specifier: ^12.0.1
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@12.0.3)(@nestjs/platform-express@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/microservices':
+        specifier: ^12.0.3
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(amqp-connection-manager@5.0.0(amqplib@2.0.1))(amqplib@2.0.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/platform-express':
+        specifier: ^12.0.1
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)
+      '@nestjs/typeorm':
+        specifier: ^12.0.1
+        version: 12.0.1(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@1.1.1(oracledb@7.0.1)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3)))
+      amqp-connection-manager:
+        specifier: ^5.0.0
+        version: 5.0.0(amqplib@2.0.1)
+      amqplib:
+        specifier: ^2.0.1
+        version: 2.0.1
+      oracledb:
+        specifier: ^7.0.1
+        version: 7.0.1
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.2
+      typeorm:
+        specifier: ^1.1.1
+        version: 1.1.1(oracledb@7.0.1)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3))
+    devDependencies:
+      '@nestjs/cli':
+        specifier: ^12.0.0
+        version: 12.0.3(@types/node@24.13.6)(prettier@3.9.8)(ts-loader@9.6.2(typescript@6.0.3)(webpack@5.111.1))(webpack@5.111.1)
+      '@nestjs/mau':
+        specifier: ^0.2.6
+        version: 0.2.8
+      '@nestjs/schematics':
+        specifier: ^12.0.0
+        version: 12.0.3(chokidar@5.0.0)(prettier@3.9.8)(typescript@6.0.3)
+      '@nestjs/testing':
+        specifier: ^12.0.1
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(@nestjs/microservices@12.0.3)(@nestjs/platform-express@12.0.3)
+      '@types/express':
+        specifier: ^5.0.0
+        version: 5.0.6
+      '@types/jest':
+        specifier: ^30.0.0
+        version: 30.0.0
+      '@types/node':
+        specifier: ^24.0.0
+        version: 24.13.6
+      '@types/supertest':
+        specifier: ^7.0.0
+        version: 7.2.1
+      jest:
+        specifier: ^30.0.0
+        version: 30.5.2(@types/node@24.13.6)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3))
+      oxlint:
+        specifier: ^1.58.0
+        version: 1.83.0(oxlint-tsgolint@7.0.2002)
+      oxlint-tsgolint:
+        specifier: ^7.0.2001
+        version: 7.0.2002
+      prettier:
+        specifier: ^3.4.2
+        version: 3.9.8
+      source-map-support:
+        specifier: ^0.5.21
+        version: 0.5.21
+      supertest:
+        specifier: ^7.0.0
+        version: 7.2.2
+      ts-jest:
+        specifier: ^29.4.0
+        version: 29.4.12(@babel/core@7.29.7)(@jest/transform@30.5.2)(@jest/types@30.5.1)(babel-jest@30.5.2(@babel/core@7.29.7))(jest-util@30.5.1)(jest@30.5.2(@types/node@24.13.6)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3)))(typescript@6.0.3)
+      ts-loader:
+        specifier: ^9.5.2
+        version: 9.6.2(typescript@6.0.3)(webpack@5.111.1)
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@24.13.6)(typescript@6.0.3)
+      tsconfig-paths:
+        specifier: ^4.2.0
+        version: 4.2.0
+      typescript:
+        specifier: ^6.0.2
+        version: 6.0.3
+
   services/users:
     dependencies:
       '@nestjs/common':
@@ -123,10 +617,13 @@ importers:
         version: 12.0.0(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(rxjs@7.8.2)
       '@nestjs/core':
         specifier: ^12.0.1
-        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@12.0.3)(@nestjs/platform-express@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/jwt':
         specifier: ^12.0.2
         version: 12.0.2(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
+      '@nestjs/microservices':
+        specifier: ^12.0.3
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(amqp-connection-manager@5.0.0(amqplib@2.0.1))(amqplib@2.0.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/passport':
         specifier: ^12.0.0
         version: 12.0.0(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(passport@0.7.0)
@@ -136,6 +633,12 @@ importers:
       '@nestjs/typeorm':
         specifier: ^12.0.1
         version: 12.0.1(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@1.1.1(oracledb@7.0.1)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3)))
+      amqp-connection-manager:
+        specifier: ^5.0.0
+        version: 5.0.0(amqplib@2.0.1)
+      amqplib:
+        specifier: ^2.0.1
+        version: 2.0.1
       bcrypt:
         specifier: ^6.0.0
         version: 6.0.0
@@ -175,7 +678,7 @@ importers:
         version: 12.0.3(chokidar@5.0.0)(prettier@3.9.8)(typescript@6.0.3)
       '@nestjs/testing':
         specifier: ^12.0.1
-        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(@nestjs/platform-express@12.0.3)
+        version: 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(@nestjs/microservices@12.0.3)(@nestjs/platform-express@12.0.3)
       '@types/bcrypt':
         specifier: ^6.0.0
         version: 6.0.0
@@ -788,6 +1291,42 @@ packages:
     resolution: {integrity: sha512-nIb0i3c/KhKEbxZfYMEKv9Mcvk5miBdZcexnvkgnAUhoMO2BUjOGT+Khf2cZzu7B51Y7v01NG2JVl/HdQEUQ6w==}
     engines: {node: '>= 20.0.0'}
     hasBin: true
+
+  '@nestjs/microservices@12.0.3':
+    resolution: {integrity: sha512-Qpie7VcC0TrQeHeiyGMB2t9IBSx9obq/+VbQqzq3XM5PZRr1Tx/Vhag2TOaxM77hBJmS1ku1c3CICT9+zsP+yg==}
+    peerDependencies:
+      '@grpc/grpc-js': '*'
+      '@nats-io/transport-node': '*'
+      '@nestjs/common': ^12.0.0
+      '@nestjs/core': ^12.0.0
+      '@nestjs/websockets': ^12.0.0
+      amqp-connection-manager: '*'
+      amqplib: '*'
+      cache-manager: '*'
+      ioredis: '*'
+      kafkajs: '*'
+      mqtt: '*'
+      reflect-metadata: ^0.1.12 || ^0.2.0
+      rxjs: ^7.1.0
+    peerDependenciesMeta:
+      '@grpc/grpc-js':
+        optional: true
+      '@nats-io/transport-node':
+        optional: true
+      '@nestjs/websockets':
+        optional: true
+      amqp-connection-manager:
+        optional: true
+      amqplib:
+        optional: true
+      cache-manager:
+        optional: true
+      ioredis:
+        optional: true
+      kafkajs:
+        optional: true
+      mqtt:
+        optional: true
 
   '@nestjs/passport@12.0.0':
     resolution: {integrity: sha512-FM9ioo2Dyj+cC7aeO4g19ijAXoRaHlW/GQZFbgXsM4Z9pyQedA8yOseb7ivfqlPwUKJlH9PFgeWniu6c0vb6dw==}
@@ -1441,6 +1980,16 @@ packages:
   ajv@8.20.0:
     resolution: {integrity: sha512-Thbli+OlOj+iMPYFBVBfJ3OmCAnaSyNn4M1vz9T6Gka5Jt9ba/HIR56joy65tY6kx/FCF5VXNB819Y7/GUrBGA==}
 
+  amqp-connection-manager@5.0.0:
+    resolution: {integrity: sha512-88yQzqa5RSBgnLl504XjvCQJ7d+osskdwvg35Lwm1LRbfLjNU9p7SQUMSP82BB7mseiq9tIUPJ3HE3eXQbpjEw==}
+    engines: {node: '>=10.0.0', npm: '>5.0.0'}
+    peerDependencies:
+      amqplib: '*'
+
+  amqplib@2.0.1:
+    resolution: {integrity: sha512-a3P2MgfCf9nzVis12VxWEn0dS6hcqve7dlEAhXDtIWR27BlhtMkILOc+H9aeHjDi6i6r94dYKc2Kx2OFe3avvg==}
+    engines: {node: '>=18'}
+
   ansi-escapes@4.3.2:
     resolution: {integrity: sha512-gKXj5ALrKWQLsYG9jlTRmR/xKluxHV+Z9QEwNIgCfM1/uwPMCuzVVnh5mwTd+OuBZcwSIMbqssNWRm1lE51QaQ==}
     engines: {node: '>=8'}
@@ -1817,6 +2366,11 @@ packages:
   dotenv@17.4.2:
     resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
     engines: {node: '>=12'}
+
+  dotenv@18.0.1:
+    resolution: {integrity: sha512-0eR4m4D/jH5eaI3evo2ZqqMii5mrTCR12v12VChdie6O1gPHs7XAjzTep0CWc1Bd+oNx3vVfbi734dK4zghigw==}
+    engines: {node: '>=12'}
+    hasBin: true
 
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
@@ -2763,6 +3317,9 @@ packages:
   pretty-format@30.5.1:
     resolution: {integrity: sha512-byhRAPguVKMQIj4kjJwJ5lAskVhfuiSdiYl/aLTWpgkGEmic2jYhJh1yE9ih8Ox44Xg9ccCT11/S6QrzSJuNrg==}
     engines: {node: ^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0}
+
+  promise-breaker@6.0.0:
+    resolution: {integrity: sha512-BthzO9yTPswGf7etOBiHCVuugs2N01/Q/94dIPls48z2zCmrnDptUUZzfIb+41xq0MnYZ/BzmOd6ikDR4ibNZA==}
 
   proxy-addr@2.0.8:
     resolution: {integrity: sha512-5nnx0yGyVUcY6t9RnWcARWtwT9F1D8O9rt08htPvnd49W1IgZtmLkhu9WfMzQj1cFxjHIO6connUNVW5k7AVyQ==}
@@ -3997,7 +4554,7 @@ snapshots:
       es-toolkit: 1.51.0
       rxjs: 7.8.2
 
-  '@nestjs/core@12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)':
+  '@nestjs/core@12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@12.0.3)(@nestjs/platform-express@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)':
     dependencies:
       '@nestjs/common': 12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       fast-safe-stringify: 2.1.1
@@ -4008,6 +4565,7 @@ snapshots:
       tslib: 2.8.1
       uid: 2.0.2
     optionalDependencies:
+      '@nestjs/microservices': 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(amqp-connection-manager@5.0.0(amqplib@2.0.1))(amqplib@2.0.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/platform-express': 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)
 
   '@nestjs/jwt@12.0.2(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))':
@@ -4026,6 +4584,18 @@ snapshots:
       ora: 5.4.1
       undici: 6.20.1
 
+  '@nestjs/microservices@12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(amqp-connection-manager@5.0.0(amqplib@2.0.1))(amqplib@2.0.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)':
+    dependencies:
+      '@nestjs/common': 12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/core': 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@12.0.3)(@nestjs/platform-express@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      iterare: 1.2.1
+      reflect-metadata: 0.2.2
+      rxjs: 7.8.2
+      tslib: 2.8.1
+    optionalDependencies:
+      amqp-connection-manager: 5.0.0(amqplib@2.0.1)
+      amqplib: 2.0.1
+
   '@nestjs/passport@12.0.0(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(passport@0.7.0)':
     dependencies:
       '@nestjs/common': 12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -4034,7 +4604,7 @@ snapshots:
   '@nestjs/platform-express@12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)':
     dependencies:
       '@nestjs/common': 12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/core': 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/core': 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@12.0.3)(@nestjs/platform-express@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       cors: 2.8.6
       express: 5.2.1
       multer: 2.4.0
@@ -4056,24 +4626,25 @@ snapshots:
     transitivePeerDependencies:
       - chokidar
 
-  '@nestjs/testing@12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(@nestjs/platform-express@12.0.3)':
+  '@nestjs/testing@12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(@nestjs/microservices@12.0.3)(@nestjs/platform-express@12.0.3)':
     dependencies:
       '@nestjs/common': 12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/core': 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/core': 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@12.0.3)(@nestjs/platform-express@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       tslib: 2.8.1
     optionalDependencies:
+      '@nestjs/microservices': 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(amqp-connection-manager@5.0.0(amqplib@2.0.1))(amqplib@2.0.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/platform-express': 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)
 
   '@nestjs/throttler@6.7.0(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(reflect-metadata@0.2.2)':
     dependencies:
       '@nestjs/common': 12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/core': 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/core': 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@12.0.3)(@nestjs/platform-express@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       reflect-metadata: 0.2.2
 
   '@nestjs/typeorm@12.0.1(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@1.1.1(oracledb@7.0.1)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3)))':
     dependencies:
       '@nestjs/common': 12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/core': 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      '@nestjs/core': 12.0.3(@nestjs/common@12.0.3(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/microservices@12.0.3)(@nestjs/platform-express@12.0.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       reflect-metadata: 0.2.2
       rxjs: 7.8.2
       typeorm: 1.1.1(oracledb@7.0.1)(ts-node@10.9.2(@types/node@24.13.6)(typescript@6.0.3))
@@ -4575,6 +5146,13 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
+  amqp-connection-manager@5.0.0(amqplib@2.0.1):
+    dependencies:
+      amqplib: 2.0.1
+      promise-breaker: 6.0.0
+
+  amqplib@2.0.1: {}
+
   ansi-escapes@4.3.2:
     dependencies:
       type-fest: 0.21.3
@@ -4923,6 +5501,8 @@ snapshots:
       dotenv: 17.4.2
 
   dotenv@17.4.2: {}
+
+  dotenv@18.0.1: {}
 
   dunder-proto@1.0.1:
     dependencies:
@@ -6004,6 +6584,8 @@ snapshots:
       '@jest/react-is-19': react-is@19.3.0
       '@jest/schemas': 30.5.0
       ansi-styles: 5.2.0
+
+  promise-breaker@6.0.0: {}
 
   proxy-addr@2.0.8:
     dependencies:

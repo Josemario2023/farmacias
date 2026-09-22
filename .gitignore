@@ -1,5 +1,20 @@
-﻿node_modules/
+﻿# Dependencias (se regeneran con pnpm install)
+node_modules/
+
+# Codigo compilado y cache de TypeScript
 dist/
+build/
+*.tsbuildinfo
+
+# Variables de entorno y secretos (NUNCA subir)
 .env
-docker-compose.yml
+*.env
+
+# Logs
 *.log
+npm-debug.log*
+
+# Archivos del sistema / editor
+.DS_Store
+Thumbs.db
+.vscode/
