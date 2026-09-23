@@ -6,6 +6,9 @@ import { ConfigService } from "@nestjs/config";
 import { Reflector } from "@nestjs/core";
 import { IS_PUBLIC_KEY } from "./public.decorator";
 
+// 10 minutos de inactividad
+const INACTIVITY_MS = 10 * 60 * 1000;
+
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
@@ -15,7 +18,6 @@ export class JwtAuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // 1) Si la ruta esta marcada @Public(), dejar pasar sin token
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -24,23 +26,39 @@ export class JwtAuthGuard implements CanActivate {
       return true;
     }
 
-    // 2) Buscar el token en la cabecera "Authorization: Bearer <token>"
     const request = context.switchToHttp().getRequest();
-    const authHeader = request.headers["authorization"];
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      throw new UnauthorizedException("Falta el token");
-    }
-    const token = authHeader.substring(7); // quita "Bearer "
+    const response = context.switchToHttp().getResponse();
 
-    // 3) Verificar la firma del token con el mismo secreto que uso users
+    // 1) Buscar el token: primero en la cookie, luego en la cabecera (respaldo)
+    let token: string | undefined = request.cookies?.["token"];
+    if (!token) {
+      const authHeader = request.headers["authorization"];
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        token = authHeader.substring(7);
+      }
+    }
+    if (!token) {
+      throw new UnauthorizedException("No autenticado");
+    }
+
+    // 2) Verificar la firma del token
     try {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: this.config.get<string>("JWT_SECRET"),
       });
-      request.user = payload; // guardamos el contenido del token por si se necesita
+      request.user = payload;
+
+      // 3) RENOVAR la cookie: resetea los 10 min de inactividad
+      response.cookie("token", token, {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: false,
+        maxAge: INACTIVITY_MS,
+      });
+
       return true;
     } catch {
-      throw new UnauthorizedException("Token invalido o expirado");
+      throw new UnauthorizedException("Sesion expirada o token invalido");
     }
   }
 }
