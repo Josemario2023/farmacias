@@ -4,6 +4,7 @@ import { Usuario } from "./usuario.entity";
 import { UsuariosService } from "./usuarios.service";
 import { UsuariosController } from "./usuarios.controller";
 
+
 @Module({
   imports: [TypeOrmModule.forFeature([Usuario])],  // registra el repositorio de Usuario
   controllers: [UsuariosController],

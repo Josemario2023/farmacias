@@ -10,6 +10,16 @@ import { AuthModule } from "./auth/auth.module";
 import { OtpCodigo } from "./auth/otp-codigo.entity";
 import { Region } from "./regiones/region.entity";
 import { RegionesModule } from "./regiones/regiones.module";
+import { Sucursal } from "./sucursales/sucursal.entity";
+import { SucursalesModule } from "./sucursales/sucursales.module";
+import { Rol } from "./roles/rol.entity";
+import { Permiso } from "./permisos/permiso.entity";
+import { RolesModule } from "./roles/roles.module";
+import { PermisosModule } from "./permisos/permisos.module";
+import { UsuarioRol } from "./asignaciones/usuario-rol.entity";
+import { RolPermiso } from "./asignaciones/rol-permiso.entity";
+import { UsuarioSucursal } from "./asignaciones/usuario-sucursal.entity";
+import { AsignacionesModule } from "./asignaciones/asignaciones.module";
 
 @Module({
   imports: [
@@ -23,7 +33,7 @@ import { RegionesModule } from "./regiones/regiones.module";
         serviceName: config.get<string>("DB_SERVICE"),
         username: config.get<string>("DB_USER"),
         password: config.get<string>("DB_PASSWORD"),
-        entities: [Usuario,OtpCodigo, Region],
+        entities: [Usuario,OtpCodigo, Region,Sucursal,Rol,Permiso, UsuarioRol, RolPermiso, UsuarioSucursal],
         synchronize: false,
       }),
     }),
@@ -43,7 +53,7 @@ import { RegionesModule } from "./regiones/regiones.module";
     ]),
     UsuariosModule,
     AuthModule,
-    RegionesModule,  ],
+    RegionesModule, RegionesModule,SucursalesModule, RolesModule, PermisosModule, AsignacionesModule, ],
   controllers: [AppController],
   providers: [AppService],
 })

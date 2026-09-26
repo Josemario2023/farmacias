@@ -10,7 +10,7 @@ export class Usuario {
   @Column({ name: "USERNAME", length: 50 })
   username: string;
 
-  @Column({ name: "PASSWORD_HASH", length: 255 })
+  @Column({ name: "PASSWORD_HASH", length: 255, select: false })
   passwordHash: string;
 
   @Column({ name: "NOMBRE", length: 120 })

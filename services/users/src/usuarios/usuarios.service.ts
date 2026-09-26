@@ -1,9 +1,10 @@
-﻿import { Injectable } from "@nestjs/common";
+﻿import { Injectable, NotFoundException, ConflictException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import * as bcrypt from "bcrypt";
 import { Usuario } from "./usuario.entity";
 import { CreateUsuarioDto } from "./create-usuario.dto";
+import { UpdateUsuarioDto } from "./update-usuario.dto";
 
 @Injectable()
 export class UsuariosService {
@@ -12,21 +13,58 @@ export class UsuariosService {
     private readonly usuarioRepo: Repository<Usuario>,
   ) {}
 
+  // LISTAR (sin passwordHash, por el select:false de la entidad)
   findAll(): Promise<Usuario[]> {
-    return this.usuarioRepo.find();
+    return this.usuarioRepo.find({ order: { username: "ASC" } });
   }
 
-  // Crea un usuario, guardando el HASH de la contrasena (nunca el texto plano)
-  async create(dto: CreateUsuarioDto): Promise<Usuario> {
-    const passwordHash = await bcrypt.hash(dto.password, 10); // 10 = costo del hash
+  // VER uno (404 si no existe)
+  async findOne(id: number): Promise<Usuario> {
+    const usuario = await this.usuarioRepo.findOne({ where: { usuarioId: id } });
+    if (!usuario) {
+      throw new NotFoundException("Usuario " + id + " no encontrado");
+    }
+    return usuario;
+  }
 
+  // CREAR (hashea la contrasena, valida username unico)
+  async create(dto: CreateUsuarioDto): Promise<Usuario> {
+    const existe = await this.usuarioRepo.findOne({ where: { username: dto.username } });
+    if (existe) {
+      throw new ConflictException("Ya existe el usuario " + dto.username);
+    }
+    const passwordHash = await bcrypt.hash(dto.password, 10);
     const usuario = this.usuarioRepo.create({
       username: dto.username,
       passwordHash: passwordHash,
       nombre: dto.nombre,
       activo: 1,
     });
+    const guardado = await this.usuarioRepo.save(usuario);
+    // No devolver el hash
+    delete (guardado as any).passwordHash;
+    return guardado;
+  }
 
+  // EDITAR (si viene password, la hashea)
+  async update(id: number, dto: UpdateUsuarioDto): Promise<Usuario> {
+    const usuario = await this.findOne(id);
+
+    if (dto.nombre !== undefined) usuario.nombre = dto.nombre;
+    if (dto.activo !== undefined) usuario.activo = dto.activo;
+    if (dto.password) {
+      usuario.passwordHash = await bcrypt.hash(dto.password, 10);
+    }
+
+    const guardado = await this.usuarioRepo.save(usuario);
+    delete (guardado as any).passwordHash;
+    return guardado;
+  }
+
+  // DESACTIVAR (baja logica: el usuario no se borra, se inhabilita)
+  async desactivar(id: number): Promise<Usuario> {
+    const usuario = await this.findOne(id);
+    usuario.activo = 0;
     return this.usuarioRepo.save(usuario);
   }
 }
