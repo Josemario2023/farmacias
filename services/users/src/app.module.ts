@@ -8,6 +8,8 @@ import { Usuario } from "./usuarios/usuario.entity";
 import { UsuariosModule } from "./usuarios/usuarios.module";
 import { AuthModule } from "./auth/auth.module";
 import { OtpCodigo } from "./auth/otp-codigo.entity";
+import { Region } from "./regiones/region.entity";
+import { RegionesModule } from "./regiones/regiones.module";
 
 @Module({
   imports: [
@@ -21,7 +23,7 @@ import { OtpCodigo } from "./auth/otp-codigo.entity";
         serviceName: config.get<string>("DB_SERVICE"),
         username: config.get<string>("DB_USER"),
         password: config.get<string>("DB_PASSWORD"),
-        entities: [Usuario,OtpCodigo],
+        entities: [Usuario,OtpCodigo, Region],
         synchronize: false,
       }),
     }),
@@ -40,7 +42,8 @@ import { OtpCodigo } from "./auth/otp-codigo.entity";
       },
     ]),
     UsuariosModule,
-    AuthModule,  ],
+    AuthModule,
+    RegionesModule,  ],
   controllers: [AppController],
   providers: [AppService],
 })

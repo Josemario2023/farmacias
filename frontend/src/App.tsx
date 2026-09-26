@@ -1,13 +1,15 @@
-import { Button, Result } from "antd";
-
+import { LoginPage } from "./pages/LoginPage";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { PosPage } from "./pages/PosPage";
 function App() {
   return (
-    <Result
-      status="success"
-      title="Frontend de Farmacias listo"
-      subTitle="Ant Design funcionando. Ahora construimos el login."
-      extra={<Button type="primary">Boton de prueba</Button>}
-    />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/pos" element={<PosPage />} />
+        <Route path="*" element={<Navigate to="/login" />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
