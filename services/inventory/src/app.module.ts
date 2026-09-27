@@ -10,6 +10,9 @@ import { Categoria } from "./categorias/categoria.entity";
 import { CategoriasModule } from "./categorias/categorias.module";
 import { Lote } from "./lotes/lote.entity";
 import { LotesModule } from "./lotes/lotes.module";
+import { MovimientoInv } from "./kardex/movimiento.entity";
+import { Existencia } from "./kardex/existencia.entity";
+import { KardexModule } from "./kardex/kardex.module";
 
 @Module({
   imports: [
@@ -23,13 +26,14 @@ import { LotesModule } from "./lotes/lotes.module";
         serviceName: config.get<string>("DB_SERVICE"),
         username: config.get<string>("DB_USER"),
         password: config.get<string>("DB_PASSWORD"),
-        entities: [Producto,Categoria,Lote],
+        entities: [Producto,Categoria,Lote, MovimientoInv,Existencia],
         synchronize: false,
       }),
     }),
     ProductosModule,
     CategoriasModule,
     LotesModule,
+    KardexModule,
   ],
   controllers: [AppController],   // quitamos EventsController (era de la prueba ping)
   providers: [AppService, ConsumerService],

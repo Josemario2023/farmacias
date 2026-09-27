@@ -640,6 +640,9 @@ importers:
       '@types/node':
         specifier: ^24.0.0
         version: 24.13.6
+      '@types/oracledb':
+        specifier: ^7.0.3
+        version: 7.0.3
       '@types/supertest':
         specifier: ^7.0.0
         version: 7.2.1
@@ -2603,6 +2606,9 @@ packages:
 
   '@types/nodemailer@8.0.2':
     resolution: {integrity: sha512-c7M5ox8p0nEOfbJ2E9Qcmt8/QCu/VzsiAhzBiZbvky2PhKZDHpKB3sQHBM5MEZNkCfBOaS6S9//AGPRTNB7IaA==}
+
+  '@types/oracledb@7.0.3':
+    resolution: {integrity: sha512-dH4zGmD0b5k62O3BqWRM/qRD41pSKNeQOuPu4FDzvbn8d4DAkLWeLYkPObjvuMJsZNPL4ceSuMiPcOpKyjvhCg==}
 
   '@types/passport-jwt@4.0.1':
     resolution: {integrity: sha512-Y0Ykz6nWP4jpxgEUYq8NoVZeCQPo1ZndJLfapI249g1jHChvRfZRO/LS3tqu26YgAS/laI1qx98sYGz0IalRXQ==}
@@ -7070,6 +7076,10 @@ snapshots:
       undici-types: 7.18.2
 
   '@types/nodemailer@8.0.2':
+    dependencies:
+      '@types/node': 24.13.6
+
+  '@types/oracledb@7.0.3':
     dependencies:
       '@types/node': 24.13.6
 
