@@ -20,6 +20,9 @@ import { ProveedoresModule } from "./proveedores/proveedores.module";
 import { OrdenCompra } from "./compras/orden-compra.entity";
 import { OrdenCompraDetalle } from "./compras/orden-detalle.entity";
 import { ComprasModule } from "./compras/compras.module";
+import { Traslado } from "./traslados/traslado.entity";
+import { TrasladoDetalle } from "./traslados/traslado-detalle.entity";
+import { TrasladosModule } from "./traslados/traslados.module";
 
 @Module({
   imports: [
@@ -33,7 +36,7 @@ import { ComprasModule } from "./compras/compras.module";
         serviceName: config.get<string>("DB_SERVICE"),
         username: config.get<string>("DB_USER"),
         password: config.get<string>("DB_PASSWORD"),
-        entities: [Producto,Categoria,Lote, MovimientoInv,Existencia, PoliticaStock,Proveedor, OrdenCompra,OrdenCompraDetalle],
+        entities: [Producto,Categoria,Lote, MovimientoInv,Existencia, PoliticaStock,Proveedor, OrdenCompra,OrdenCompraDetalle,Traslado,TrasladoDetalle],
         synchronize: false,
       }),
     }),
@@ -45,6 +48,7 @@ import { ComprasModule } from "./compras/compras.module";
     ProductosModule,
     ProveedoresModule,
     ComprasModule,
+    TrasladosModule,
   ],
   controllers: [AppController],   // quitamos EventsController (era de la prueba ping)
   providers: [AppService, ConsumerService],
