@@ -13,6 +13,13 @@ import { LotesModule } from "./lotes/lotes.module";
 import { MovimientoInv } from "./kardex/movimiento.entity";
 import { Existencia } from "./kardex/existencia.entity";
 import { KardexModule } from "./kardex/kardex.module";
+import { PoliticaStock } from "./politicas/politica-stock.entity";
+import { PoliticasModule } from "./politicas/politicas.module";
+import { Proveedor } from "./proveedores/proveedor.entity";
+import { ProveedoresModule } from "./proveedores/proveedores.module";
+import { OrdenCompra } from "./compras/orden-compra.entity";
+import { OrdenCompraDetalle } from "./compras/orden-detalle.entity";
+import { ComprasModule } from "./compras/compras.module";
 
 @Module({
   imports: [
@@ -26,7 +33,7 @@ import { KardexModule } from "./kardex/kardex.module";
         serviceName: config.get<string>("DB_SERVICE"),
         username: config.get<string>("DB_USER"),
         password: config.get<string>("DB_PASSWORD"),
-        entities: [Producto,Categoria,Lote, MovimientoInv,Existencia],
+        entities: [Producto,Categoria,Lote, MovimientoInv,Existencia, PoliticaStock,Proveedor, OrdenCompra,OrdenCompraDetalle],
         synchronize: false,
       }),
     }),
@@ -34,6 +41,10 @@ import { KardexModule } from "./kardex/kardex.module";
     CategoriasModule,
     LotesModule,
     KardexModule,
+    PoliticasModule,
+    ProductosModule,
+    ProveedoresModule,
+    ComprasModule,
   ],
   controllers: [AppController],   // quitamos EventsController (era de la prueba ping)
   providers: [AppService, ConsumerService],
