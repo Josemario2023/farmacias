@@ -6,6 +6,7 @@ import { AppService } from "./app.service";
 import { Evento } from "./eventos/evento.entity";
 import { EventosModule } from "./eventos/eventos.module";
 import { ConsumerService } from "./messaging/consumer.service";
+import { SyncModule } from "./sync/sync.module";
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ConsumerService } from "./messaging/consumer.service";
     }),
     TypeOrmModule.forFeature([Evento]),
     EventosModule,
+    SyncModule,
   ],
   controllers: [AppController],   // quitamos SaleConsumer de aqui
   providers: [AppService, ConsumerService],  // agregamos ConsumerService

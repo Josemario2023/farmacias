@@ -6,6 +6,10 @@ import { AppService } from "./app.service";
 import { Producto } from "./productos/producto.entity";
 import { ProductosModule } from "./productos/productos.module";
 import { ConsumerService } from "./messaging/consumer.service";
+import { Categoria } from "./categorias/categoria.entity";
+import { CategoriasModule } from "./categorias/categorias.module";
+import { Lote } from "./lotes/lote.entity";
+import { LotesModule } from "./lotes/lotes.module";
 
 @Module({
   imports: [
@@ -19,11 +23,13 @@ import { ConsumerService } from "./messaging/consumer.service";
         serviceName: config.get<string>("DB_SERVICE"),
         username: config.get<string>("DB_USER"),
         password: config.get<string>("DB_PASSWORD"),
-        entities: [Producto],
+        entities: [Producto,Categoria,Lote],
         synchronize: false,
       }),
     }),
     ProductosModule,
+    CategoriasModule,
+    LotesModule,
   ],
   controllers: [AppController],   // quitamos EventsController (era de la prueba ping)
   providers: [AppService, ConsumerService],
