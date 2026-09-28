@@ -4,7 +4,11 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { Factura } from "./facturas/factura.entity";
+import { FacturaDetalle } from "./facturas/factura-detalle.entity";
+import { SerieFactura } from "./facturas/serie-factura.entity";
 import { FacturasModule } from "./facturas/facturas.module";
+import { ConsumerService } from "./messaging/consumer.service";
+
 
 @Module({
   imports: [
@@ -18,13 +22,13 @@ import { FacturasModule } from "./facturas/facturas.module";
         serviceName: config.get<string>("DB_SERVICE"),
         username: config.get<string>("DB_USER"),
         password: config.get<string>("DB_PASSWORD"),
-        entities: [Factura],
+        entities: [Factura,FacturaDetalle, SerieFactura],
         synchronize: false,
       }),
     }),
     FacturasModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService,ConsumerService],
 })
 export class AppModule {}
