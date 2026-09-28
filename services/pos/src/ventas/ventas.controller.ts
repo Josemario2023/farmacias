@@ -1,19 +1,25 @@
-﻿import { Controller, Get, Post, Body } from "@nestjs/common";
+﻿import { Controller, Get, Post, Patch, Body, Param, ParseIntPipe } from "@nestjs/common";
 import { VentasService } from "./ventas.service";
-import { Venta } from "./venta.entity";
+import { CreateVentaDto } from "./create-venta.dto";
 
 @Controller("ventas")
 export class VentasController {
   constructor(private readonly ventasService: VentasService) {}
 
   @Get()
-  findAll(): Promise<Venta[]> {
-    return this.ventasService.findAll();
-  }
+  findAll() { return this.ventasService.findAll(); }
 
-  // POST /ventas -> crea la venta y dispara SaleCreated
+  // Devuelve la venta CON sus lineas y pagos
+  @Get(":id")
+  findOne(@Param("id", ParseIntPipe) id: number) { return this.ventasService.findOne(id); }
+
+  // POST /ventas -> valida stock, descuenta, guarda y publica el evento
   @Post()
-  create(@Body() datos: any) {
-    return this.ventasService.create(datos);
+  crear(@Body() dto: CreateVentaDto) { return this.ventasService.crearVenta(dto); }
+
+  // PATCH /ventas/1/anular -> devuelve el stock al inventario
+  @Patch(":id/anular")
+  anular(@Param("id", ParseIntPipe) id: number, @Body() body: { usuarioId: number }) {
+    return this.ventasService.anular(id, body.usuarioId);
   }
 }

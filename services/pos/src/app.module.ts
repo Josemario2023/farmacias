@@ -5,6 +5,9 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { Venta } from "./ventas/venta.entity";
 import { VentasModule } from "./ventas/ventas.module";
+import { VentaDetalle } from "./ventas/venta-detalle.entity";
+import { Pago } from "./ventas/pago.entity";
+import { Cliente } from "./ventas/cliente.entity";
 
 @Module({
   imports: [
@@ -18,7 +21,7 @@ import { VentasModule } from "./ventas/ventas.module";
         serviceName: config.get<string>("DB_SERVICE"),
         username: config.get<string>("DB_USER"),
         password: config.get<string>("DB_PASSWORD"),
-        entities: [Venta],
+        entities: [Venta, VentaDetalle,Pago,Cliente],
         synchronize: false,
       }),
     }),
