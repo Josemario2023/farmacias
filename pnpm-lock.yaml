@@ -409,6 +409,12 @@ importers:
       amqplib:
         specifier: ^2.0.1
         version: 2.0.1
+      class-transformer:
+        specifier: ^0.5.1
+        version: 0.5.1
+      class-validator:
+        specifier: ^0.15.1
+        version: 0.15.1
       dotenv:
         specifier: ^18.0.1
         version: 18.0.1
@@ -446,6 +452,9 @@ importers:
       '@types/node':
         specifier: ^24.0.0
         version: 24.13.6
+      '@types/oracledb':
+        specifier: ^7.0.3
+        version: 7.0.3
       '@types/supertest':
         specifier: ^7.0.0
         version: 7.2.1
