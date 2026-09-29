@@ -5,7 +5,7 @@ import { ConsolidadosService } from "./consolidados.service";
 export class ConsolidadosController {
   constructor(private readonly svc: ConsolidadosService) {}
 
-  // ---------- CONSOLIDACIÓN ----------
+  //  CONSOLIDACIÓN 
   // POST /consolidados/ventas?fecha=2026-09-29
   @Post("consolidados/ventas")
   consolidarVentas(@Query("fecha") fecha: string) {
@@ -13,7 +13,7 @@ export class ConsolidadosController {
     return this.svc.consolidarVentas(dia);
   }
 
-  // ---------- TABLEROS ----------
+  //  TABLEROS 
   // GET /tableros/ventas-region?desde=2026-09-01&hasta=2026-09-30
   @Get("tableros/ventas-region")
   ventasPorRegion(@Query("desde") desde: string, @Query("hasta") hasta: string) {
@@ -29,8 +29,31 @@ export class ConsolidadosController {
   ) {
     return this.svc.ventasPorSucursal(regionId, desde, hasta);
   }
+  //CONSOLIDAR CAJA
+  @Post("consolidados/caja")
+  consolidarCaja(@Query("fecha") fecha: string) {
+    const dia = fecha ?? new Date().toISOString().slice(0, 10);
+    return this.svc.consolidarCaja(dia);
+  }
+  //CONSOLIDAR INVENTARIO
+  @Post("consolidados/inventario")
+  consolidarInventario(@Query("fecha") fecha: string, @Body() datos: any) {
+    const dia = fecha ?? new Date().toISOString().slice(0, 10);
+    return this.svc.consolidarInventario(dia, datos);
+  } 
 
-  // ---------- HALLAZGOS ----------
+  //TABLEROS
+  @Get("tableros/caja-region")
+  cajaPorRegion(@Query("desde") desde: string, @Query("hasta") hasta: string) {
+    return this.svc.cajaPorRegion(desde, hasta);
+  }
+
+  @Get("tableros/inventario-region")
+  inventarioPorRegion(@Query("fecha") fecha: string) {
+    return this.svc.inventarioPorRegion(fecha);
+  }
+
+  //  HALLAZGOS 
   // GET /hallazgos?estado=ABIERTO&severidad=ALTA&regionId=1
   @Get("hallazgos")
   listar(@Query() filtros: any) {

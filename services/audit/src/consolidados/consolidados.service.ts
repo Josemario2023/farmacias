@@ -3,6 +3,8 @@ import { InjectRepository, InjectDataSource } from "@nestjs/typeorm";
 import { Repository, DataSource } from "typeorm";
 import { ConsolidadoVentas } from "./consolidado-ventas.entity";
 import { Hallazgo } from "./hallazgo.entity";
+import { ConsolidadoCaja } from "./consolidado-caja.entity";
+import { ConsolidadoInventario } from "./consolidado-inventario.entity";
 
 @Injectable()
 export class ConsolidadosService {
@@ -11,8 +13,13 @@ export class ConsolidadosService {
     private readonly consVentasRepo: Repository<ConsolidadoVentas>,
     @InjectRepository(Hallazgo)
     private readonly hallazgoRepo: Repository<Hallazgo>,
+    @InjectRepository(ConsolidadoCaja)
+    private readonly consCajaRepo: Repository<ConsolidadoCaja>,
+    @InjectRepository(ConsolidadoInventario)
+    private readonly consInvRepo: Repository<ConsolidadoInventario>,
     @InjectDataSource()
     private readonly dataSource: DataSource,
+  
   ) {}
 
   
@@ -57,8 +64,83 @@ export class ConsolidadosService {
       consolidados: resultados,
     };
   }
+  //CONSOLIDAR CAJA
+  async consolidarCaja(fecha: string): Promise<any> {
+    const filas = await this.dataSource.query(
+      `SELECT NVL(region_id, 1)  AS "regionId",
+              sucursal_id        AS "sucursalId",
+              SUM(TO_NUMBER(JSON_VALUE(payload, '$.totalSistema')))  AS "sistema",
+              SUM(TO_NUMBER(JSON_VALUE(payload, '$.totalContado')))  AS "contado",
+              SUM(TO_NUMBER(JSON_VALUE(payload, '$.diferencia')))    AS "diferencia",
+              COUNT(*)           AS "cortes"
+         FROM EVENTO
+        WHERE tipo_evento = 'CorteCerrado'
+          AND TRUNC(ocurrido_en) = TO_DATE(:1, 'YYYY-MM-DD')
+        GROUP BY NVL(region_id, 1), sucursal_id`,
+      [fecha],
+    );
 
-  // ---------- CONSULTAS PARA TABLEROS ----------
+    const resultados: any[] = [];
+
+    for (const f of filas) {
+      // Recalcular: borrar el previo del día
+      await this.consCajaRepo.delete({
+        fecha: new Date(fecha + "T12:00:00"),
+        sucursalId: Number(f.sucursalId),
+      });
+
+      const consolidado = this.consCajaRepo.create({
+        fecha: new Date(fecha + "T12:00:00"),
+        regionId: Number(f.regionId),
+        sucursalId: Number(f.sucursalId),
+        // El "ingreso" del día es lo que el sistema esperaba tener
+        totalIngresos: Number(f.sistema ?? 0),
+        totalEgresos: 0,
+        diferencia: Number(f.diferencia ?? 0),
+      });
+      resultados.push(await this.consCajaRepo.save(consolidado));
+    }
+
+    return {
+      mensaje: "Consolidacion de caja completada",
+      fecha,
+      sucursalesProcesadas: resultados.length,
+      consolidados: resultados,
+    };
+  }
+
+  
+  // CONSOLIDAR INVENTARIO
+
+  
+  async consolidarInventario(fecha: string, datos: {
+    sucursalId: number;
+    regionId: number;
+    valorInventario: number;
+    productosBajoMinimo: number;
+  }): Promise<ConsolidadoInventario> {
+    await this.consInvRepo.delete({
+      fecha: new Date(fecha + "T12:00:00"),
+      sucursalId: datos.sucursalId,
+    });
+
+    return this.consInvRepo.save(
+      this.consInvRepo.create({
+        fecha: new Date(fecha + "T12:00:00"),
+        sucursalId: datos.sucursalId,
+        regionId: datos.regionId,
+        valorInventario: datos.valorInventario,
+        productosBajoMinimo: datos.productosBajoMinimo,
+      }),
+    );
+  }
+
+
+
+
+
+
+  // CONSULTAS PARA TABLEROS 
 
   // Ventas consolidadas por región (el tablero de la dirección)
   async ventasPorRegion(fechaInicio: string, fechaFin: string): Promise<any[]> {
@@ -89,7 +171,36 @@ export class ConsolidadosService {
       [regionId, fechaInicio, fechaFin],
     );
   }
+  
+  // Caja por región: 
+  async cajaPorRegion(desde: string, hasta: string): Promise<any[]> {
+    return this.dataSource.query(
+      `SELECT region_id          AS "regionId",
+              SUM(total_ingresos) AS "totalIngresos",
+              SUM(diferencia)     AS "diferenciaAcumulada",
+              COUNT(DISTINCT sucursal_id) AS "sucursales"
+         FROM CONSOLIDADO_CAJA
+        WHERE fecha BETWEEN TO_DATE(:1,'YYYY-MM-DD') AND TO_DATE(:2,'YYYY-MM-DD')
+        GROUP BY region_id
+        ORDER BY SUM(diferencia) ASC`,
+      [desde, hasta],
+    );
+  }
 
+  // Inventario por región
+  async inventarioPorRegion(fecha: string): Promise<any[]> {
+    return this.dataSource.query(
+      `SELECT region_id                    AS "regionId",
+              SUM(valor_inventario)        AS "valorInventario",
+              SUM(productos_bajo_minimo)   AS "productosBajoMinimo",
+              COUNT(DISTINCT sucursal_id)  AS "sucursales"
+         FROM CONSOLIDADO_INVENTARIO
+        WHERE fecha = TO_DATE(:1,'YYYY-MM-DD')
+        GROUP BY region_id
+        ORDER BY region_id`,
+      [fecha],
+    );
+  }
  
   // HALLAZGOS
   
@@ -139,4 +250,9 @@ export class ConsolidadosService {
         GROUP BY severidad`,
     );
   }
+
+
+
+
+
 }

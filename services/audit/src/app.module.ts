@@ -10,6 +10,8 @@ import { SyncModule } from "./sync/sync.module";
 import { ConsolidadoVentas } from "./consolidados/consolidado-ventas.entity";
 import { Hallazgo } from "./consolidados/hallazgo.entity";
 import { ConsolidadosModule } from "./consolidados/consolidados.module";
+import { ConsolidadoCaja } from "./consolidados/consolidado-caja.entity";
+import { ConsolidadoInventario } from "./consolidados/consolidado-inventario.entity";
 
 @Module({
   imports: [
@@ -23,7 +25,7 @@ import { ConsolidadosModule } from "./consolidados/consolidados.module";
         serviceName: config.get<string>("DB_SERVICE"),
         username: config.get<string>("DB_USER"),
         password: config.get<string>("DB_PASSWORD"),
-        entities: [Evento, ConsolidadoVentas, Hallazgo],
+        entities: [Evento, ConsolidadoVentas, Hallazgo, ConsolidadoCaja,ConsolidadoInventario],
         synchronize: false,
       }),
     }),
