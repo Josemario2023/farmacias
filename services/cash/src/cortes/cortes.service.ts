@@ -6,6 +6,7 @@ import { CorteCaja } from "./corte-caja.entity";
 import { Caja } from "./caja.entity";
 import { MovimientoCaja } from "./movimiento-caja.entity";
 import { CreateCajaDto, AbrirCorteDto, CreateMovimientoCajaDto, CerrarCorteDto } from "./cortes.dto";
+import { PublisherService } from "../messaging/publisher.service";
 
 @Injectable()
 export class CortesService {
@@ -14,6 +15,7 @@ export class CortesService {
     @InjectRepository(Caja) private readonly cajaRepo: Repository<Caja>,
     @InjectRepository(MovimientoCaja) private readonly movRepo: Repository<MovimientoCaja>,
     @InjectDataSource() private readonly dataSource: DataSource,
+    private readonly publisher: PublisherService,
   ) {}
 
   // ---------------- CAJAS (CRUD ) ----------------
@@ -117,6 +119,20 @@ export class CortesService {
       let estado = "CUADRADO";
       if (diferencia < 0) estado = "FALTANTE";
       else if (diferencia > 0) estado = "SOBRANTE";
+
+      // Publicar el evento para que audit detecte hallazgos automaticamente
+      this.publisher.publish("CorteCerrado", {
+        corteId,
+        cajaId: corte.cajaId,
+        sucursalId: corte.sucursalId,
+        regionId: 1,
+        usuarioId: dto.usuarioId,
+        montoApertura: Number(corte.montoApertura),
+        totalSistema,
+        totalContado: Number(corte.totalContado),
+        diferencia,
+        estado,
+      });
 
       return {
         mensaje: "Corte cerrado",

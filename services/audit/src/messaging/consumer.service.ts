@@ -4,6 +4,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import * as amqp from "amqplib";
 import { Evento } from "../eventos/evento.entity";
+import { ConsolidadosService } from "../consolidados/consolidados.service";
 
 const EXCHANGE = "farmacias.events";
 const QUEUE = "audit_queue";
@@ -17,6 +18,7 @@ export class ConsumerService implements OnModuleInit {
     private readonly config: ConfigService,
     @InjectRepository(Evento)
     private readonly eventoRepo: Repository<Evento>,
+    private readonly consolidadosService: ConsolidadosService,
   ) {}
 
   async onModuleInit() {
@@ -36,26 +38,70 @@ export class ConsumerService implements OnModuleInit {
     // 4) Consumir: por cada mensaje, procesarlo
     this.channel.consume(QUEUE, async (msg: any) => {
       if (!msg) return;
-      const contenido = JSON.parse(msg.content.toString());
-      await this.procesar(contenido);
-      this.channel.ack(msg);   // confirmar que se proceso (lo saca de la cola)
+      try {
+        const contenido = JSON.parse(msg.content.toString());
+        await this.procesar(contenido);
+      } catch (e) {
+        console.error(">>> audit: error procesando evento", e);
+      }
+      this.channel.ack(msg);
     });
   }
 
-  // Aqui va la logica de negocio de audit: guardar el evento
-    async procesar(mensaje: any) {
+  async procesar(mensaje: any) {
     const { tipoEvento, data } = mensaje;
-    console.log(">>> audit RECIBIO:", tipoEvento, "-", data.numero);
+    console.log(">>> audit RECIBIO:", tipoEvento);
 
+    // 1) Guardar SIEMPRE el evento crudo
     const evento = this.eventoRepo.create({
       tipoEvento: tipoEvento,
-      servicioOrigen: "pos",
-      agregadoId: data.ventaId,
+      servicioOrigen: tipoEvento === "CorteCerrado" ? "cash" : "pos",
+      agregadoId: data.ventaId ?? data.corteId ?? null,
       sucursalId: data.sucursalId,
-      regionId: data.regionId ?? null,   // ← D10: foto de la región en el momento
+      regionId: data.regionId ?? null,
       payload: JSON.stringify(data),
     });
     await this.eventoRepo.save(evento);
     console.log(">>> audit GUARDO el evento");
+
+    // 2) DETECCION AUTOMATICA DE HALLAZGOS
+    if (tipoEvento === "CorteCerrado") {
+      await this.revisarCorte(data);
+    }
+  }
+
+  // Detecta faltantes y sobrantes al cerrar un corte de caja
+  private async revisarCorte(data: any) {
+    const diferencia = Number(data.diferencia ?? 0);
+
+    if (diferencia === 0) {
+      console.log("    corte cuadrado: sin hallazgo");
+      return;
+    }
+
+    const esFaltante = diferencia < 0;
+    const monto = Math.abs(diferencia);
+
+    // La severidad depende de la magnitud del descuadre
+    let severidad = "BAJA";
+    if (monto >= 500) severidad = "ALTA";
+    else if (monto >= 100) severidad = "MEDIA";
+
+    await this.consolidadosService.crearHallazgo({
+      tipo: esFaltante ? "FALTANTE_CAJA" : "SOBRANTE_CAJA",
+      severidad,
+      descripcion:
+        (esFaltante ? "Faltante" : "Sobrante") + " de " + monto +
+        " en el corte " + data.corteId +
+        ". Sistema: " + data.totalSistema + ", contado: " + data.totalContado,
+      sucursalId: data.sucursalId,
+      regionId: data.regionId ?? 1,
+      monto,
+    });
+
+    console.log(
+      "    HALLAZGO generado: " + (esFaltante ? "FALTANTE" : "SOBRANTE") +
+      " de " + monto + " (severidad " + severidad + ")",
+    );
   }
 }
