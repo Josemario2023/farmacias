@@ -43,7 +43,7 @@ export class ConsumerService implements OnModuleInit {
   }
 
   // Aqui va la logica de negocio de audit: guardar el evento
-  async procesar(mensaje: any) {
+    async procesar(mensaje: any) {
     const { tipoEvento, data } = mensaje;
     console.log(">>> audit RECIBIO:", tipoEvento, "-", data.numero);
 
@@ -52,6 +52,7 @@ export class ConsumerService implements OnModuleInit {
       servicioOrigen: "pos",
       agregadoId: data.ventaId,
       sucursalId: data.sucursalId,
+      regionId: data.regionId ?? null,   // ← D10: foto de la región en el momento
       payload: JSON.stringify(data),
     });
     await this.eventoRepo.save(evento);

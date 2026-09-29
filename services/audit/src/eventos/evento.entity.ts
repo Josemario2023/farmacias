@@ -19,6 +19,9 @@ export class Evento {
   @Column({ name: "SUCURSAL_ID", type: "number", nullable: true })
   sucursalId: number | null;
 
+  @Column({ name: "REGION_ID", type: "number", nullable: true })
+  regionId: number | null;
+
   // El payload es el contenido JSON del evento. En Oracle es un CLOB.
   // Lo mapeamos como string; TypeORM maneja la conversion.
   @Column({ name: "PAYLOAD", type: "clob", nullable: true })

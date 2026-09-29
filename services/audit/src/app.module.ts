@@ -7,6 +7,9 @@ import { Evento } from "./eventos/evento.entity";
 import { EventosModule } from "./eventos/eventos.module";
 import { ConsumerService } from "./messaging/consumer.service";
 import { SyncModule } from "./sync/sync.module";
+import { ConsolidadoVentas } from "./consolidados/consolidado-ventas.entity";
+import { Hallazgo } from "./consolidados/hallazgo.entity";
+import { ConsolidadosModule } from "./consolidados/consolidados.module";
 
 @Module({
   imports: [
@@ -20,13 +23,14 @@ import { SyncModule } from "./sync/sync.module";
         serviceName: config.get<string>("DB_SERVICE"),
         username: config.get<string>("DB_USER"),
         password: config.get<string>("DB_PASSWORD"),
-        entities: [Evento],
+        entities: [Evento, ConsolidadoVentas, Hallazgo],
         synchronize: false,
       }),
     }),
     TypeOrmModule.forFeature([Evento]),
     EventosModule,
     SyncModule,
+    ConsolidadosModule,
   ],
   controllers: [AppController],   // quitamos SaleConsumer de aqui
   providers: [AppService, ConsumerService],  // agregamos ConsumerService
