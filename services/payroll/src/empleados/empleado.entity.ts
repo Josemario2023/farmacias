@@ -11,7 +11,6 @@ export class Empleado {
   @Column({ name: "NOMBRE", length: 150 })
   nombre: string;
 
-  // type explicito porque es nullable (string | null)
   @Column({ name: "PUESTO", type: "varchar2", length: 80, nullable: true })
   puesto: string | null;
 

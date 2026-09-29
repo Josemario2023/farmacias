@@ -5,6 +5,9 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { Empleado } from "./empleados/empleado.entity";
 import { EmpleadosModule } from "./empleados/empleados.module";
+import { Planilla } from "./planillas/planilla.entity";
+import { PagoPlanilla } from "./planillas/pago-planilla.entity";
+import { PlanillasModule } from "./planillas/planillas.module";
 
 @Module({
   imports: [
@@ -18,11 +21,12 @@ import { EmpleadosModule } from "./empleados/empleados.module";
         serviceName: config.get<string>("DB_SERVICE"),
         username: config.get<string>("DB_USER"),
         password: config.get<string>("DB_PASSWORD"),
-        entities: [Empleado],
+        entities: [Empleado, Planilla, PagoPlanilla],
         synchronize: false,
       }),
     }),
     EmpleadosModule,
+    PlanillasModule,
   ],
   controllers: [AppController],
   providers: [AppService],
