@@ -7,6 +7,7 @@ import { Existencia } from "./existencia.entity";
 import { CreateMovimientoDto } from "./create-movimiento.dto";
 import { CreateTrasladoDto } from "./create-traslado.dto";
 import { CreateTomaFisicaDto } from "./create-toma-fisica.dto";
+import { PublisherService } from "../messaging/publisher.services";
 
 @Injectable()
 export class KardexService {
@@ -17,6 +18,7 @@ export class KardexService {
     private readonly existRepo: Repository<Existencia>,
     @InjectDataSource()
     private readonly dataSource: DataSource,
+    private readonly publisher: PublisherService,
   ) {}
 
   ///REGISTRO DE LOS MOVIMIENTOS
@@ -40,8 +42,12 @@ export class KardexService {
         ],
       );
 
-      await runner.query("COMMIT");
+            await runner.query("COMMIT");
       const movimientoId = resultado?.outBinds?.[0] ?? resultado?.[0];
+
+      // Publicar el cambio de stock para que delivery actualice su read model
+      await this.publicarCambioStock(dto.sucursalId, dto.productoId);
+
       return { mensaje: "Movimiento registrado", movimientoId };
     } catch (error: any) {
       await runner.query("ROLLBACK");
@@ -169,6 +175,36 @@ export class KardexService {
     if (sucursalId) where.sucursalId = sucursalId;
     if (productoId) where.productoId = productoId;
     return this.existRepo.find({ where, order: { sucursalId: "ASC", productoId: "ASC" } });
+  }
+
+  private async publicarCambioStock(sucursalId: number, productoId: number) {
+    try {
+      const filas = await this.dataSource.query(
+        `SELECT NVL(SUM(e.cantidad), 0) AS "total",
+                p.nombre                AS "nombre",
+                p.precio_base           AS "precio"
+           FROM PRODUCTO p
+           LEFT JOIN EXISTENCIA e
+                  ON e.producto_id = p.producto_id
+                 AND e.sucursal_id = :1
+          WHERE p.producto_id = :2
+          GROUP BY p.nombre, p.precio_base`,
+        [sucursalId, productoId],
+      );
+
+      if (filas.length === 0) return;
+
+      this.publisher.publish("StockChanged", {
+        sucursalId,
+        productoId,
+        nombreProducto: filas[0].nombre,
+        cantidadDisponible: Number(filas[0].total),
+        precio: Number(filas[0].precio),
+      });
+    } catch (e) {
+      // Si falla la publicacion, NO rompemos el movimiento (ya se guardo bien)
+      console.error(">>> inventory: no se pudo publicar StockChanged", e);
+    }
   }
 
   // Limpia el error de Oracle para mostrar solo el mensaje util

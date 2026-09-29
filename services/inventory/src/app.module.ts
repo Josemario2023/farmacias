@@ -24,6 +24,7 @@ import { Traslado } from "./traslados/traslado.entity";
 import { TrasladoDetalle } from "./traslados/traslado-detalle.entity";
 import { TrasladosModule } from "./traslados/traslados.module";
 
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -51,6 +52,6 @@ import { TrasladosModule } from "./traslados/traslados.module";
     TrasladosModule,
   ],
   controllers: [AppController],   // quitamos EventsController (era de la prueba ping)
-  providers: [AppService, ConsumerService],
+  providers: [AppService, ConsumerService,],
 })
 export class AppModule {}

@@ -5,6 +5,11 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { Disponibilidad } from "./disponibilidad/disponibilidad.entity";
 import { DisponibilidadModule } from "./disponibilidad/disponibilidad.module";
+import { CoberturaSucursal } from "./cotizaciones/cobertura.entity";
+import { FormaPagoSucursal } from "./cotizaciones/forma-pago.entity";
+import { Cotizacion } from "./cotizaciones/cotizacion.entity";
+import { CotizacionesModule } from "./cotizaciones/cotizaciones.module";
+import { ConsumerService } from "./messaging/consumer.service";
 
 @Module({
   imports: [
@@ -18,13 +23,14 @@ import { DisponibilidadModule } from "./disponibilidad/disponibilidad.module";
         serviceName: config.get<string>("DB_SERVICE"),
         username: config.get<string>("DB_USER"),
         password: config.get<string>("DB_PASSWORD"),
-        entities: [Disponibilidad],
+        entities: [Disponibilidad, CoberturaSucursal, FormaPagoSucursal,Cotizacion],
         synchronize: false,
       }),
     }),
     DisponibilidadModule,
+    CotizacionesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ConsumerService],
 })
 export class AppModule {}
