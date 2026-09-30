@@ -14,6 +14,8 @@ import {
   IconPos, IconFactura, IconInventario, IconCaja,
 } from "../components/layout/icons";
 import "../styles/components.css";
+import { BotonExportar } from "../components/ui/BotonExportar";
+import type { ColumnaCsv } from "../utils/exportar";
 
 const money = (n: number) =>
   "Q " + Number(n).toLocaleString("es-GT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -79,7 +81,14 @@ export function PanelPage() {
   if (cargando) {
     return <div style={{ padding: 80, textAlign: "center" }}><Spin size="large" /></div>;
   }
-
+  const columnasVentas: ColumnaCsv<any>[] = [
+    { titulo: "Número", valor: (v) => v.numero },
+    { titulo: "Fecha", valor: (v) => dayjs(v.fecha).format("DD/MM/YYYY HH:mm") },
+    { titulo: "Sucursal", valor: (v) => v.sucursalId },
+    { titulo: "Usuario", valor: (v) => v.usuarioId },
+    { titulo: "Estado", valor: (v) => v.estado },
+    { titulo: "Total", valor: (v) => Number(v.total).toFixed(2) },
+  ];
   return (
     <>
       <div className="page-head">
@@ -90,6 +99,17 @@ export function PanelPage() {
         <Button icon={<ReloadOutlined />} onClick={actualizarConsolidado}>
           Actualizar consolidado
         </Button>
+                <div style={{ display: "flex", gap: 8 }}>
+          <BotonExportar
+            nombreArchivo="ventas"
+            columnas={columnasVentas}
+            filas={ventas}
+            texto="Exportar ventas"
+          />
+          <Button icon={<ReloadOutlined />} onClick={actualizarConsolidado}>
+            Actualizar consolidado
+          </Button>
+        </div>
       </div>
 
       {/* ---------- KPIs ---------- */}

@@ -5,6 +5,8 @@ import { obtenerKardex, obtenerProductos } from "../api/inventory.api";
 import type { Movimiento, Producto, FiltrosKardex } from "../api/inventory.api";
 import { TipoMovimiento, LISTA_TIPOS, etiquetaTipo } from "../components/ui/TipoMovimiento";
 import "../styles/components.css";
+import { BotonExportar } from "../components/ui/BotonExportar";
+import type { ColumnaCsv } from "../utils/exportar";
 
 export function KardexPage() {
   const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
@@ -44,6 +46,23 @@ export function KardexPage() {
   // Formatea la fecha para mostrar
   const fmtFecha = (iso: string) => dayjs(iso).format("DD/MM/YYYY HH:mm");
 
+    // Columnas del archivo CSV
+  const columnasCsv: ColumnaCsv<Movimiento>[] = [
+    { titulo: "Fecha", valor: (m) => dayjs(m.fechaHora).format("DD/MM/YYYY HH:mm") },
+    { titulo: "Sucursal", valor: (m) => m.sucursalId },
+    { titulo: "Tipo", valor: (m) => etiquetaTipo(m.tipoMovimiento) },
+    { titulo: "Producto ID", valor: (m) => m.productoId },
+    { titulo: "Lote", valor: (m) => m.numeroLote },
+    { titulo: "Vencimiento", valor: (m) => dayjs(m.fechaVencimiento).format("DD/MM/YYYY") },
+    { titulo: "Stock anterior", valor: (m) => m.stockAnterior },
+    { titulo: "Entrada", valor: (m) => m.entrada },
+    { titulo: "Salida", valor: (m) => m.salida },
+    { titulo: "Stock nuevo", valor: (m) => m.stockNuevo },
+    { titulo: "Usuario", valor: (m) => m.usuarioId },
+    { titulo: "Documento", valor: (m) => m.documentoRef },
+    { titulo: "Observaciones", valor: (m) => m.observaciones },
+  ];
+
   return (
     <>
       <div className="page-head">
@@ -51,6 +70,12 @@ export function KardexPage() {
           <h2>Kardex</h2>
           <p>Historial completo de movimientos de inventario. Cada línea muestra el saldo resultante.</p>
         </div>
+        <BotonExportar
+          nombreArchivo="kardex"
+          columnas={columnasCsv}
+          filas={movimientos}
+          texto="Exportar kardex"
+        />
       </div>
 
       <div className="card">
