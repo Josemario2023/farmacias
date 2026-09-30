@@ -1,55 +1,98 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, Typography, message } from "antd";
-import { CredencialesForm } from "../components/CredencialesForm";
-import { OtpForm } from "../components/OtpForm";
+import { CredencialesForm } from "../components/auth/CredencialesForm";
+import { OtpForm } from "../components/auth/OtpForm";
 import { login, verifyOtp } from "../api/auth.api";
-
-const { Title } = Typography;
+import "../styles/login.css";
 
 export function LoginPage() {
+  // "paso" decide qué formulario se muestra en el panel derecho
   const [paso, setPaso] = useState<"credenciales" | "otp">("credenciales");
   const [username, setUsername] = useState("");
   const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState("");
+
   const navigate = useNavigate();
 
-  const manejarCredenciales = async (valores: { username: string; password: string }) => {
+  // PASO 1: enviar usuario y contraseña
+  const manejarCredenciales = async (user: string, password: string) => {
     setCargando(true);
+    setError("");
     try {
-      await login(valores.username, valores.password);
-      setUsername(valores.username);
-      setPaso("otp");
-      message.success("Código enviado. Revisa Mailhog.");
-    } catch {
-      message.error("Credenciales inválidas");
+      await login(user, password);
+      setUsername(user);
+      setPaso("otp");            // cambia el formulario, la marca se queda
+    } catch (e: any) {
+      setError(e?.response?.data?.message ?? "Credenciales inválidas");
     } finally {
       setCargando(false);
     }
   };
 
-  const manejarOtp = async (valores: { codigo: string }) => {
+  // PASO 2: enviar el código; el navegador recibe la cookie httpOnly
+  const manejarOtp = async (codigo: string) => {
     setCargando(true);
+    setError("");
     try {
-      await verifyOtp(username, valores.codigo);
-      message.success("¡Login exitoso!");
+      await verifyOtp(username, codigo);
       navigate("/pos");
-    } catch {
-      message.error("Código inválido o expirado");
+    } catch (e: any) {
+      setError(e?.response?.data?.message ?? "Código inválido o expirado");
     } finally {
       setCargando(false);
     }
+  };
+
+  const volver = () => {
+    setPaso("credenciales");
+    setError("");
   };
 
   return (
-    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", background: "#f0f2f5" }}>
-      <Card style={{ width: 380 }}>
-        <Title level={3} style={{ textAlign: "center" }}>Farmacias — Ingreso</Title>
-        {paso === "credenciales" ? (
-          <CredencialesForm onSubmit={manejarCredenciales} cargando={cargando} />
-        ) : (
-          <OtpForm onSubmit={manejarOtp} onVolver={() => setPaso("credenciales")} cargando={cargando} />
-        )}
-      </Card>
+    <div className="login-shell">
+      {/* ---------- IZQUIERDA: panel de marca (fijo en ambos pasos) ---------- */}
+      <div className="login-brandside">
+        <div className="login-logo">
+          <div className="cross" />
+          <div>
+            <b>Farmacias Batres</b>
+            <small>Sistema integral de farmacias</small>
+          </div>
+        </div>
+
+        <div>
+          
+          <div className="login-pills">
+            <span className="login-pill">Kardex y lotes</span>
+            <span className="login-pill">POS + Facturación</span>
+            <span className="login-pill">Corte de caja</span>
+            <span className="login-pill">Traslados</span>
+            <span className="login-pill">Auditoría por región</span>
+          </div>
+        </div>
+
+        <small className="login-foot-brand">
+          Sistema en desarrollo · datos de prueba
+        </small>
+      </div>
+
+      {/* ---------- DERECHA: el formulario cambia según el paso ---------- */}
+      <div className="login-formside">
+        <div style={{ width: "min(380px, 100%)" }}>
+          {error && <div className="login-error">{error}</div>}
+
+          {paso === "credenciales" ? (
+            <CredencialesForm onSubmit={manejarCredenciales} cargando={cargando} />
+          ) : (
+            <OtpForm
+              username={username}
+              onSubmit={manejarOtp}
+              onVolver={volver}
+              cargando={cargando}
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 }

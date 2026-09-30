@@ -1,0 +1,86 @@
+
+
+:root {
+  /* Superficies */
+  --bg: #F6F8F7;
+  --panel: #FFFFFF;
+
+  /* Texto */
+  --ink: #14231D;      /* texto principal */
+  --muted: #5C6B64;    /* texto secundario */
+  --faint: #8A9A92;    /* texto tenue */
+
+  /* Bordes */
+  --line: #E2E8E4;
+  --line-soft: #EDF1EF;
+
+  /* Marca (verde farmacia) */
+  --brand: #0E7C5A;
+  --brand-ink: #0A5C42;
+  --brand-wash: #E6F3EE;
+
+  /* Barra lateral (verde oscuro) */
+  --teal: #0a0e2e;
+  --teal-2: #0F3D37;
+  --teal-line: #1C4E47;
+  --teal-ink: #CFE3DD;
+
+  /* Estados semánticos */
+  --amber: #C7841A;  --amber-wash: #FBF1DD;   /* advertencia */
+  --red: #B42318;    --red-wash: #FBE9E7;     /* error / faltante */
+  --blue: #1E6FB8;   --blue-wash: #E7F0F9;    /* información */
+  --violet: #6C4BB6; --violet-wash: #EEE9F8;  /* traslados */
+
+  /* Formas */
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 1px 2px rgba(20,35,29,.04), 0 8px 24px -12px rgba(20,35,29,.14);
+
+  /* Tipografía */
+  --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --display: "Space Grotesk", "Inter", system-ui, sans-serif;
+}
+
+/* Tema oscuro */
+:root[data-theme="dark"] {
+  --bg: #edf5f2;
+  --panel: #e5f2ee;
+  --ink: #232324;
+  --muted: #1b1b1c;
+  --faint: #6a91f4;
+  --line: #0f4dea;
+  --line-soft: #1747d9;
+  --brand: #2f3ab4;
+  --brand-ink: #0b16ed;
+  --brand-wash: #1374f3;
+  --teal: #173b7d;
+  --teal-2: #0033ff;
+  --teal-line: #b7b4ce;
+  --teal-ink: #e9f3f0;
+  --amber-wash: #9f895d;
+  --red-wash: #d37b71;
+  --blue-wash: #2e8adb;
+  --violet-wash: #5314e7;
+  --shadow: 0 1px 2px rgba(218, 98, 98, 0.374), 0 10px 28px -14px rgba(0,0,0,.6);
+}
+
+/* Reset básico */
+* { box-sizing: border-box; }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--display);
+  margin: 0;
+}
