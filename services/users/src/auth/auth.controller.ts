@@ -18,7 +18,6 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { access_token } = await this.authService.verifyOtp(body.username, body.codigo);
-
     res.cookie("token", access_token, {
       httpOnly: true,
       sameSite: "lax",
@@ -28,4 +27,15 @@ export class AuthController {
 
     return { mensaje: "Login exitoso", usuario: body.username };
   }
+    // Cerrar sesion: borra la cookie del navegador
+  @Post("logout")
+  logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie("token", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: false,
+    });
+    return { mensaje: "Sesion cerrada" };
+  }
+
 }

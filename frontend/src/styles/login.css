@@ -57,24 +57,32 @@
 .login-logo {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   position: relative;
   z-index: 1;
 }
 .login-logo b {
   font-family: var(--display);
-  font-size: 20px;
+  font-size: 4rem;
   color: #fff;
 }
 .login-logo small {
   color: var(--teal-ink);
+  font-size: 1.5rem;
   opacity: .8;
   display: block;
+}
+.login-logo-img {
+  width: 24rem;
+  height:26rem;
+  object-fit: contain;
+  border-radius: 11px;
+  flex: none;
 }
 
 .login-brandside h1 {
   font-family: var(--display);
-  font-size: 40px;
+  font-size: 4rem;
   line-height: 1.05;
   margin: 0 0 14px;
   font-weight: 600;

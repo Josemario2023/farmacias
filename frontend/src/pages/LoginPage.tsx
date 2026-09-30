@@ -4,6 +4,7 @@ import { CredencialesForm } from "../components/auth/CredencialesForm";
 import { OtpForm } from "../components/auth/OtpForm";
 import { login, verifyOtp } from "../api/auth.api";
 import "../styles/login.css";
+import logo from "../assets/logo.png";
 
 export function LoginPage() {
   // "paso" decide qué formulario se muestra en el panel derecho
@@ -53,9 +54,9 @@ export function LoginPage() {
       {/* ---------- IZQUIERDA: panel de marca (fijo en ambos pasos) ---------- */}
       <div className="login-brandside">
         <div className="login-logo">
-          <div className="cross" />
+          <img src={logo} alt="Logo" className="login-logo-img" />
           <div>
-            <b>Farmacias Batres</b>
+            <b>FarmaRed</b>
             <small>Sistema integral de farmacias</small>
           </div>
         </div>
@@ -72,7 +73,7 @@ export function LoginPage() {
         </div>
 
         <small className="login-foot-brand">
-          Sistema en desarrollo · datos de prueba
+          Sistema en desarrollo · Derechos Reservados jmluc 2026
         </small>
       </div>
 

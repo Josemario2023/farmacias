@@ -11,3 +11,9 @@ export async function verifyOtp(username: string, codigo: string) {
   const { data } = await api.post("/auth/verify-otp", { username, codigo });
   return data;
 }
+
+// Cierra la sesion: borra la cookie httpOnly en el servidor
+export async function logout() {
+  const { data } = await api.post("/auth/logout");
+  return data;
+}

@@ -1,24 +1,20 @@
-import { theme } from "antd";
 import type { ThemeConfig } from "antd";
 
-
 export const antdTheme: ThemeConfig = {
-  
-  algorithm: theme.darkAlgorithm,
-
+  // Sin darkAlgorithm: volvemos al tema claro
   token: {
-    colorPrimary: "#2FB488",
-    colorLink: "#2FB488",
-    colorSuccess: "#2FB488",
-    colorWarning: "#C7841A",
-    colorError: "#B42318",
-    colorInfo: "#1E6FB8",
+    colorPrimary: "#1B5FA8",
+    colorLink: "#1B5FA8",
+    colorSuccess: "#1E8E5A",
+    colorWarning: "#B8791A",
+    colorError: "#C0392B",
+    colorInfo: "#1B5FA8",
 
-    colorBgBase: "#0C1512",
-    colorBgContainer: "#12201C",
-    colorTextBase: "#E7F0EC",
-    colorBorder: "#22332E",
-    colorBorderSecondary: "#1A2925",
+    colorBgBase: "#FFFFFF",
+    colorBgContainer: "#FFFFFF",
+    colorTextBase: "#14202E",
+    colorBorder: "#DDE5EF",
+    colorBorderSecondary: "#EBF0F6",
 
     borderRadius: 8,
     borderRadiusLG: 12,
@@ -27,11 +23,12 @@ export const antdTheme: ThemeConfig = {
   },
   components: {
     Table: {
-      headerBg: "#0C1512",
-      headerColor: "#9FB3AB",
-      rowHoverBg: "#1A2925",
-      borderColor: "#22332E",
+      headerBg: "#F4F7FB",
+      headerColor: "#5A6B80",
+      rowHoverBg: "#EBF0F6",
+      borderColor: "#DDE5EF",
     },
     Button: { fontWeight: 500, primaryShadow: "none" },
+    Select: { optionSelectedBg: "#E8F0FA" },
   },
 };

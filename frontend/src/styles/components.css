@@ -1,0 +1,250 @@
+/*-------- Tarjeta ---------- */
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+.card.pad { padding: 18px; }
+
+.card-h {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line-soft);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.card-h h3 {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 600;
+  font-family: var(--display);
+  color: var(--ink);
+}
+.card-h .link {
+  font-size: 13px;
+  color: var(--brand);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ---------- Encabezado de página ---------- */
+.page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.page-head h2 {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 4px;
+  color: var(--ink);
+}
+.page-head p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+/* ---------- KPIs (tarjetas de indicador) ---------- */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.kpi .lab {
+  font-size: 12.5px;
+  color: var(--muted);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.kpi .num {
+  font-family: var(--display);
+  font-size: 29px;
+  font-weight: 600;
+  letter-spacing: -.5px;
+  margin: 8px 0 3px;
+  line-height: 1;
+  color: var(--ink);
+}
+.kpi .delta {
+  font-size: 12.5px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.kpi .ic-chip {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  float: right;
+}
+
+/* Chips de color semántico */
+.chip-green  { background: var(--brand-wash);  color: var(--brand); }
+.chip-amber  { background: var(--amber-wash);  color: var(--amber); }
+.chip-blue   { background: var(--blue-wash);   color: var(--blue); }
+.chip-violet { background: var(--violet-wash); color: var(--violet); }
+.chip-red    { background: var(--red-wash);    color: var(--red); }
+
+/* ---------- Tablas ---------- */
+.tbl-wrap { overflow-x: auto; }
+
+table.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+table.tbl thead th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+  white-space: nowrap;
+}
+table.tbl tbody td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--ink);
+  vertical-align: top;
+}
+table.tbl tbody tr:hover { background: var(--line-soft); }
+table.tbl tbody tr:last-child td { border-bottom: none; }
+table.tbl .num { text-align: right; font-variant-numeric: tabular-nums; }
+table.tbl small.muted { color: var(--muted); font-size: 12px; }
+
+/* Valores positivos y negativos del kardex */
+.delta-pos { color: var(--brand); font-weight: 600; }
+.delta-neg { color: var(--red);   font-weight: 600; }
+
+/* ---------- Barra de filtros ---------- */
+.toolbar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.toolbar .f {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.toolbar .f label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+
+/* ---------- Etiquetas de estado ---------- */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* ---------- Estado vacío ---------- */
+.empty {
+  padding: 48px 20px;
+  text-align: center;
+  color: var(--muted);
+}
+.empty b { display: block; color: var(--ink); margin-bottom: 4px; font-size: 15px; }
+
+/* POS — punto de venta
+    */
+.pos-grid {
+  display: grid;
+  grid-template-columns: 1.3fr .7fr;
+  gap: 16px;
+  align-items: start;
+}
+
+/* Resultados de búsqueda */
+.pos-result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line-soft);
+  cursor: pointer;
+}
+.pos-result:hover { background: var(--brand-wash); }
+.pos-result:last-child { border-bottom: none; }
+.pos-result .info { flex: 1; min-width: 0; }
+.pos-result .info b { display: block; font-size: 14px; color: var(--ink); }
+.pos-result .info small { color: var(--muted); font-size: 12px; }
+.pos-result .precio {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--brand);
+  white-space: nowrap;
+}
+
+/* Carrito */
+.cart-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line-soft);
+}
+.cart-item .ci-info { flex: 1; min-width: 0; }
+.cart-item .ci-info b { font-size: 13.5px; display: block; color: var(--ink); }
+.cart-item .ci-info small { color: var(--muted); font-size: 11.5px; }
+.cart-item .ci-total {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--ink);
+}
+
+/* Totales */
+.pos-total {
+  padding: 14px 18px;
+  border-top: 1px solid var(--line);
+}
+.pos-total .row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13.5px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.pos-total .row.big {
+  font-family: var(--display);
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 10px 0 14px;
+}
+
+@media (max-width: 1100px) {
+  .pos-grid { grid-template-columns: 1fr; }
+}
