@@ -54,6 +54,36 @@ export class VentasService {
       );
     }
 
+        // Validando turno de caja
+    
+    const cashUrl = this.config.get<string>("CASH_URL") ?? "http://localhost:3005";
+    let corteId: number | null = null;
+
+    try {
+      const { data: cortes } = await firstValueFrom(
+        this.http.get(cashUrl + "/cortes", { params: { sucursalId: dto.sucursalId } }),
+      );
+      const abierto = (cortes ?? []).find(
+        (c: any) => c.estado === "ABIERTO" && Number(c.sucursalId) === Number(dto.sucursalId),
+      );
+
+      if (!abierto) {
+        throw new BadRequestException(
+          "No hay un turno de caja ABIERTO en esta sucursal. Abre la caja antes de vender.",
+        );
+      }
+      corteId = abierto.corteId;
+    } catch (error: any) {
+      // Si el error es NUESTRO (no hay turno), propagarlo tal cual
+      if (error instanceof BadRequestException) throw error;
+      // Si cash no responde, no dejamos vender: sin caja no hay control
+      throw new BadRequestException(
+        "No se pudo verificar el estado de la caja. Intenta de nuevo.",
+      );
+    }
+
+
+
 
     // Descontar stock
     const movimientosHechos: any[] = [];
@@ -93,7 +123,7 @@ export class VentasService {
           numero: dto.numero,
           sucursalId: dto.sucursalId,
           usuarioId: dto.usuarioId,
-          corteId: dto.corteId ?? null,
+          corteId: corteId,
           clienteId: dto.clienteId ?? null,
           total: totalVenta,
           estado: "PAGADA",
@@ -182,7 +212,7 @@ export class VentasService {
     }
   }
 
-  // ---------- ANULAR venta (devuelve el stock) ----------
+  // ANULAR venta y se devuelve el producto
   async anular(id: number, usuarioId: number): Promise<any> {
     const venta = await this.ventaRepo.findOne({ where: { ventaId: id } });
     if (!venta) throw new BadRequestException("Venta " + id + " no encontrada");

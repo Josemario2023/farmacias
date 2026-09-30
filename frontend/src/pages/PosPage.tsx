@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import { Input, Button, Select, InputNumber, message, Empty, Tag, Modal } from "antd";
+import { Input, Button, Select, InputNumber, message, Empty, Tag, Modal, Alert } from "antd";
 import { SearchOutlined, DeleteOutlined, ShoppingCartOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 import { obtenerProductos, obtenerLotes, obtenerExistencias } from "../api/inventory.api";
 import type { Producto, Lote } from "../api/inventory.api";
 import { crearVenta } from "../api/pos.api";
 import type { LineaVenta } from "../api/pos.api";
+import { obtenerCortes } from "../api/cash.api";
+import type { Corte } from "../api/cash.api";
 import "../styles/components.css";
 
 interface ItemCarrito extends LineaVenta {
@@ -17,23 +20,28 @@ export function PosPage() {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [lotes, setLotes] = useState<Lote[]>([]);
   const [existencias, setExistencias] = useState<any[]>([]);
+  const [turno, setTurno] = useState<Corte | null>(null);
   const [busqueda, setBusqueda] = useState("");
   const [carrito, setCarrito] = useState<ItemCarrito[]>([]);
   const [formaPago, setFormaPago] = useState<"EFECTIVO" | "TARJETA" | "TRANSFERENCIA">("EFECTIVO");
   const [cobrando, setCobrando] = useState(false);
 
+  const navigate = useNavigate();
   const SUCURSAL = 1;   // TODO: tomarla del selector del topbar
 
   const cargar = async () => {
     try {
-      const [p, l, e] = await Promise.all([
+      const [p, l, e, cortes] = await Promise.all([
         obtenerProductos(),
         obtenerLotes(),
         obtenerExistencias(SUCURSAL),
+        obtenerCortes(SUCURSAL),
       ]);
       setProductos(p.filter((x) => x.activo === 1));
       setLotes(l);
       setExistencias(e);
+      // Buscar el turno ABIERTO de esta sucursal
+      setTurno(cortes.find((c) => c.estado === "ABIERTO") ?? null);
     } catch {
       message.error("No se pudo cargar el catálogo");
     }
@@ -70,28 +78,30 @@ export function PosPage() {
       return;
     }
 
-    // Si ya está en el carrito, sumar una unidad
-    const yaEsta = carrito.find((c) => c.productoId === p.productoId && c.loteId === existencia.loteId);
+    const yaEsta = carrito.find(
+      (c) => c.productoId === p.productoId && c.loteId === existencia.loteId,
+    );
     if (yaEsta) {
       if (yaEsta.cantidad + 1 > yaEsta.disponible) {
         message.warning("No hay más stock disponible de ese lote");
         return;
       }
-      setCarrito(carrito.map((c) =>
-        c === yaEsta ? { ...c, cantidad: c.cantidad + 1 } : c
-      ));
+      setCarrito(carrito.map((c) => (c === yaEsta ? { ...c, cantidad: c.cantidad + 1 } : c)));
     } else {
       const lote = lotes.find((l) => l.loteId === existencia.loteId);
-      setCarrito([...carrito, {
-        productoId: p.productoId,
-        loteId: existencia.loteId,
-        descripcion: p.nombre,
-        cantidad: 1,
-        precioUnitario: Number(p.precioBase),
-        numeroLote: lote?.numeroLote ?? "—",
-        disponible: Number(existencia.cantidad),
-        requiereReceta: p.requiereReceta === 1,
-      }]);
+      setCarrito([
+        ...carrito,
+        {
+          productoId: p.productoId,
+          loteId: existencia.loteId,
+          descripcion: p.nombre,
+          cantidad: 1,
+          precioUnitario: Number(p.precioBase),
+          numeroLote: lote?.numeroLote ?? "—",
+          disponible: Number(existencia.cantidad),
+          requiereReceta: p.requiereReceta === 1,
+        },
+      ]);
     }
 
     if (p.requiereReceta === 1) {
@@ -117,6 +127,12 @@ export function PosPage() {
   const cobrar = async () => {
     if (carrito.length === 0) return;
 
+    // REGLA DE NEGOCIO: no se puede vender sin turno de caja abierto
+    if (!turno) {
+      message.warning("Abre un turno de caja antes de vender");
+      return;
+    }
+
     Modal.confirm({
       title: "Confirmar venta",
       content: "Total a cobrar: Q " + total.toFixed(2) + " · " + formaPago,
@@ -141,9 +157,11 @@ export function PosPage() {
             pagos: [{ formaPago, monto: total }],
           });
 
-          message.success("Venta " + venta.numero + " registrada. Stock descontado y factura emitida.");
+          message.success(
+            "Venta " + venta.numero + " registrada. Stock descontado y factura emitida.",
+          );
           setCarrito([]);
-          cargar();   // refrescar el stock
+          cargar();   // refrescar stock y estado de caja
         } catch (e: any) {
           message.error(e?.response?.data?.message ?? "No se pudo registrar la venta");
         } finally {
@@ -158,9 +176,32 @@ export function PosPage() {
       <div className="page-head">
         <div>
           <h2>Punto de venta</h2>
-          <p>Busca productos, arma el carrito y cobra. El stock se descuenta al confirmar.</p>
+          <p>
+            Busca productos, arma el carrito y cobra. El stock se descuenta al confirmar.
+            {turno && (
+              <>
+                {" · "}Turno <b>{turno.turno}</b> · corte #{turno.corteId}
+              </>
+            )}
+          </p>
         </div>
       </div>
+
+      {/* AVISO: sin turno de caja no se puede vender */}
+      {!turno && (
+        <Alert
+          type="warning"
+          showIcon
+          style={{ marginBottom: 16 }}
+          message="No hay turno de caja abierto"
+          description="Debes abrir la caja antes de registrar ventas. De lo contrario el efectivo no quedaría registrado en ningún corte."
+          action={
+            <Button size="small" type="primary" onClick={() => navigate("/caja")}>
+              Ir a Caja
+            </Button>
+          }
+        />
+      )}
 
       <div className="pos-grid">
         {/* ---------- IZQUIERDA: búsqueda ---------- */}
@@ -217,9 +258,13 @@ export function PosPage() {
         {/* ---------- DERECHA: carrito ---------- */}
         <div className="card">
           <div className="card-h">
-            <h3><ShoppingCartOutlined /> Carrito</h3>
+            <h3>
+              <ShoppingCartOutlined /> Carrito
+            </h3>
             {carrito.length > 0 && (
-              <a className="link" onClick={() => setCarrito([])}>Vaciar</a>
+              <a className="link" onClick={() => setCarrito([])}>
+                Vaciar
+              </a>
             )}
           </div>
 
@@ -236,7 +281,9 @@ export function PosPage() {
                   <div key={i} className="cart-item">
                     <div className="ci-info">
                       <b>{c.descripcion}</b>
-                      <small>Lote {c.numeroLote} · Q {c.precioUnitario.toFixed(2)} c/u</small>
+                      <small>
+                        Lote {c.numeroLote} · Q {c.precioUnitario.toFixed(2)} c/u
+                      </small>
                       <div style={{ marginTop: 6 }}>
                         <InputNumber
                           size="small"
@@ -255,9 +302,7 @@ export function PosPage() {
                         />
                       </div>
                     </div>
-                    <div className="ci-total">
-                      Q {(c.cantidad * c.precioUnitario).toFixed(2)}
-                    </div>
+                    <div className="ci-total">Q {(c.cantidad * c.precioUnitario).toFixed(2)}</div>
                   </div>
                 ))}
               </div>
@@ -289,8 +334,9 @@ export function PosPage() {
                   block
                   loading={cobrando}
                   onClick={cobrar}
+                  disabled={!turno}
                 >
-                  Cobrar Q {total.toFixed(2)}
+                  {turno ? "Cobrar Q " + total.toFixed(2) : "Abre la caja para cobrar"}
                 </Button>
               </div>
             </>

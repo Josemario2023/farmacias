@@ -8,6 +8,7 @@ import { PosPage } from "./pages/PosPage";
 import { KardexPage } from "./pages/KardexPage";
 import { InventarioPage } from "./pages/InventarioPage";
 import { PanelPage } from "./pages/PanelPage";
+import { CajaPage } from "./pages/CajaPage";
 
 function App() {
   return (
@@ -21,11 +22,10 @@ function App() {
           {/* Todo lo demás va DENTRO del layout */}
           <Route element={<AppLayout />}>
             <Route path="/pos" element={<PosPage />} />
-            <Route path="/kardex" element={<KardexPage />} />
-            
-            <Route path="/inventario" element={<InventarioPage />} />
-            
+            <Route path="/kardex" element={<KardexPage />} />            
+            <Route path="/inventario" element={<InventarioPage />} />            
             <Route path="/panel" element={<PanelPage />} />  
+            <Route path="/caja" element={<CajaPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/login" />} />
