@@ -24,6 +24,17 @@ export interface NuevaVenta {
   pagos: PagoVenta[];
 }
 
+export interface Venta {
+  ventaId: number;
+  numero: string;
+  sucursalId: number;
+  usuarioId: number;
+  clienteId: number | null;
+  total: number;
+  estado: string;
+  fecha: string;
+}
+
 export async function crearVenta(venta: NuevaVenta) {
   const { data } = await api.post("/ventas", venta);
   return data;

@@ -18,7 +18,7 @@ export function LoginPage() {
   // PASO 1: enviar usuario y contraseña
   const manejarCredenciales = async (user: string, password: string) => {
     setCargando(true);
-    setError("");
+    setError("");  
     try {
       await login(user, password);
       setUsername(user);
@@ -36,7 +36,7 @@ export function LoginPage() {
     setError("");
     try {
       await verifyOtp(username, codigo);
-      navigate("/pos");
+      navigate("/panel");
     } catch (e: any) {
       setError(e?.response?.data?.message ?? "Código inválido o expirado");
     } finally {

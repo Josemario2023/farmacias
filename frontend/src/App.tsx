@@ -7,6 +7,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { PosPage } from "./pages/PosPage";
 import { KardexPage } from "./pages/KardexPage";
 import { InventarioPage } from "./pages/InventarioPage";
+import { PanelPage } from "./pages/PanelPage";
 
 function App() {
   return (
@@ -21,8 +22,10 @@ function App() {
           <Route element={<AppLayout />}>
             <Route path="/pos" element={<PosPage />} />
             <Route path="/kardex" element={<KardexPage />} />
+            
             <Route path="/inventario" element={<InventarioPage />} />
-             
+            
+            <Route path="/panel" element={<PanelPage />} />  
           </Route>
 
           <Route path="*" element={<Navigate to="/login" />} />
