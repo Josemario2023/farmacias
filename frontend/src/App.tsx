@@ -9,6 +9,7 @@ import { KardexPage } from "./pages/KardexPage";
 import { InventarioPage } from "./pages/InventarioPage";
 import { PanelPage } from "./pages/PanelPage";
 import { CajaPage } from "./pages/CajaPage";
+import { AuditoriaPage } from "./pages/AuditoriaPage";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path="/inventario" element={<InventarioPage />} />            
             <Route path="/panel" element={<PanelPage />} />  
             <Route path="/caja" element={<CajaPage />} />
+            <Route path="/auditoria" element={<AuditoriaPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/login" />} />

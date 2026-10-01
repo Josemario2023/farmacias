@@ -53,8 +53,24 @@ export class ConsolidadosController {
     return this.svc.inventarioPorRegion(fecha);
   }
 
+    // GET /bitacora?esquema=FRM_USERS&tabla=USUARIO&operacion=UPDATE
+  @Get("bitacora")
+  bitacora(@Query() filtros: any) {
+    return this.svc.consultarBitacora(filtros);
+  }
+
+  @Get("bitacora/resumen")
+  resumenBitacora() {
+    return this.svc.resumenBitacora();
+  }
+
+  @Post("consolidados/todo")
+  consolidarTodo() {
+    return this.svc.consolidarTodo();
+  }
+
   //  HALLAZGOS 
-  // GET /hallazgos?estado=ABIERTO&severidad=ALTA&regionId=1
+ 
   @Get("hallazgos")
   listar(@Query() filtros: any) {
     return this.svc.listarHallazgos(filtros);

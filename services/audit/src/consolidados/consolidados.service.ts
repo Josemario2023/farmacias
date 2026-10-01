@@ -136,7 +136,63 @@ export class ConsolidadosService {
   }
 
 
+  // BITACORA: el registro de todos los cambios del sistema
+  
+  async consultarBitacora(filtros: any): Promise<any[]> {
+    let sql = `
+      SELECT bitacora_id        AS "bitacoraId",
+             origen_esquema     AS "esquema",
+             tabla              AS "tabla",
+             operacion          AS "operacion",
+             clave_pk           AS "clavePk",
+             valores_anteriores AS "valoresAnteriores",
+             valores_nuevos     AS "valoresNuevos",
+             usuario            AS "usuarioBd",
+             TO_CHAR(fecha_evento, 'YYYY-MM-DD"T"HH24:MI:SS') AS "fechaEvento"
+        FROM BITACORA_LOCAL
+       WHERE 1 = 1
+    `;
+    const params: any[] = [];
+    let i = 1;
 
+    if (filtros.esquema) {
+      sql += ` AND origen_esquema = :${i++}`;
+      params.push(filtros.esquema);
+    }
+    if (filtros.tabla) {
+      sql += ` AND tabla = :${i++}`;
+      params.push(filtros.tabla);
+    }
+    if (filtros.operacion) {
+      sql += ` AND operacion = :${i++}`;
+      params.push(filtros.operacion);
+    }
+    if (filtros.fechaInicio) {
+      sql += ` AND fecha_evento >= TO_DATE(:${i++}, 'YYYY-MM-DD')`;
+      params.push(filtros.fechaInicio);
+    }
+    if (filtros.fechaFin) {
+      sql += ` AND fecha_evento < TO_DATE(:${i++}, 'YYYY-MM-DD') + 1`;
+      params.push(filtros.fechaFin);
+    }
+
+    sql += " ORDER BY bitacora_id DESC FETCH FIRST 300 ROWS ONLY";
+
+    return this.dataSource.query(sql, params);
+  }
+
+  // Resumen: cuantos cambios por tabla
+  async resumenBitacora(): Promise<any[]> {
+    return this.dataSource.query(
+      `SELECT origen_esquema AS "esquema",
+              tabla          AS "tabla",
+              operacion      AS "operacion",
+              COUNT(*)       AS "cantidad"
+         FROM BITACORA_LOCAL
+        GROUP BY origen_esquema, tabla, operacion
+        ORDER BY COUNT(*) DESC`,
+    );
+  }
 
 
 
@@ -201,6 +257,30 @@ export class ConsolidadosService {
       [fecha],
     );
   }
+
+  // Consolida TODOS los dias que tengan eventos de venta
+  async consolidarTodo(): Promise<any> {
+    const dias = await this.dataSource.query(
+      `SELECT TO_CHAR(TRUNC(ocurrido_en), 'YYYY-MM-DD') AS "dia"
+         FROM EVENTO
+        WHERE tipo_evento = 'SaleCreated'
+        GROUP BY TRUNC(ocurrido_en)
+        ORDER BY 1`,
+    );
+
+    const procesados: string[] = [];
+    for (const d of dias) {
+      await this.consolidarVentas(d.dia);
+      procesados.push(d.dia);
+    }
+
+    return { mensaje: "Consolidacion completa", diasProcesados: procesados.length, dias: procesados };
+  }
+
+
+
+
+
  
   // HALLAZGOS
   

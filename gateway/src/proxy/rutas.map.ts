@@ -41,6 +41,7 @@ export const MAPA_RUTAS: Record<string, string> = {
   "eventos": "AUDIT",
   "consolidados": "AUDIT",
   "tableros": "AUDIT",
+  "bitacora": "AUDIT",
   "hallazgos": "AUDIT",
   "sync": "AUDIT",
 

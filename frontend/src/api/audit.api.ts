@@ -38,3 +38,57 @@ export async function consolidarVentas(fecha: string) {
   const { data } = await api.post("/consolidados/ventas", null, { params: { fecha } });
   return data;
 }
+
+export interface RegistroBitacora {
+  bitacoraId: number;
+  esquema: string;
+  tabla: string;
+  operacion: string;
+  clavePk: string;
+  valoresAnteriores: string | null;
+  valoresNuevos: string | null;
+  usuarioBd: string;
+  fechaEvento: string;
+}
+
+export async function obtenerBitacora(filtros?: {
+  esquema?: string;
+  tabla?: string;
+  operacion?: string;
+  fechaInicio?: string;
+  fechaFin?: string;
+}): Promise<RegistroBitacora[]> {
+  const { data } = await api.get("/bitacora", { params: filtros });
+  return data;
+}
+
+export async function resumenBitacora() {
+  const { data } = await api.get("/bitacora/resumen");
+  return data as { esquema: string; tabla: string; operacion: string; cantidad: number }[];
+}
+
+export async function cambiarEstadoHallazgo(id: number, estado: string) {
+  const { data } = await api.patch("/hallazgos/" + id + "/estado", { estado });
+  return data;
+}
+
+export async function cajaPorRegion(desde: string, hasta: string) {
+  const { data } = await api.get("/tableros/caja-region", { params: { desde, hasta } });
+  return data as {
+    regionId: number;
+    totalIngresos: number;
+    diferenciaAcumulada: number;
+    sucursales: number;
+  }[];
+}
+
+export async function sincronizarBitacora() {
+  const { data } = await api.post("/sync");
+  return data;
+}
+
+// Consolida TODOS los días que tengan eventos de venta
+export async function consolidarTodo() {
+  const { data } = await api.post("/consolidados/todo");
+  return data;
+}
