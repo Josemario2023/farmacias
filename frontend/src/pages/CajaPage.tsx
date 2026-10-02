@@ -15,6 +15,7 @@ import type { ColumnaCsv } from "../utils/exportar";
 import { IconCaja } from "../components/layout/icons";
 import "../styles/components.css";
 import { useCatalogos } from "../hoocks/useCatalogos";
+import { useSesion } from "../hoocks/useSesion";
 
 const money = (n: number | null | undefined) =>
   n === null || n === undefined
@@ -35,7 +36,8 @@ export function CajaPage() {
   const [modalMov, setModalMov] = useState(false);
   const [modalCerrar, setModalCerrar] = useState(false);
 
-  const SUCURSAL = 1;
+  const { usuario } = useSesion();
+  const SUCURSAL = usuario?.sucursalId ?? 1;
 
   const cargar = async () => {
     setCargando(true);

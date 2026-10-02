@@ -9,6 +9,7 @@ import type { LineaVenta } from "../api/pos.api";
 import { obtenerCortes } from "../api/cash.api";
 import type { Corte } from "../api/cash.api";
 import "../styles/components.css";
+import { useSesion } from "../hoocks/useSesion";
 
 interface ItemCarrito extends LineaVenta {
   numeroLote: string;
@@ -27,7 +28,8 @@ export function PosPage() {
   const [cobrando, setCobrando] = useState(false);
 
   const navigate = useNavigate();
-  const SUCURSAL = 1;   // TODO: tomarla del selector del topbar
+  const { usuario } = useSesion();
+  const SUCURSAL = usuario?.sucursalId ?? 1;   // TODO: tomarla del selector del topbar
 
   const cargar = async () => {
     try {
@@ -145,8 +147,8 @@ export function PosPage() {
           const venta = await crearVenta({
             numero,
             sucursalId: SUCURSAL,
-            usuarioId: 1,
-            regionId: 1,
+            usuarioId: usuario?.usuarioId ?? 1,
+            regionId: usuario?.regionId ?? 1,
             lineas: carrito.map((c) => ({
               productoId: c.productoId,
               loteId: c.loteId,

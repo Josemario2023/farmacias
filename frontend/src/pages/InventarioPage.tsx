@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { Tabs, Button, Table, Tag, Spin, message, Alert } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { Tabs, Button, Table, Tag, Spin, message, Alert, Popconfirm, Space } from "antd";
+import { PlusOutlined,EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import {
   obtenerProductos, obtenerCategorias, obtenerLotes,
-  obtenerExistencias, alertasBajoMinimo, alertasPorVencer,
+  obtenerExistencias, alertasBajoMinimo, alertasPorVencer,eliminarProducto,eliminarCategoria,eliminarLote
 } from "../api/inventory.api";
 import type { Producto, Categoria, Lote } from "../api/inventory.api";
 import { MovimientoModal } from "../components/inventario/MovimientoModal";
@@ -12,6 +12,7 @@ import { CategoriaModal, ProductoModal, LoteModal } from "../components/inventar
 import "../styles/components.css";
 import { SiPuede } from "../components/ui/Sipuede";
 import { useCatalogos } from "../hoocks/useCatalogos";
+
 
 
 export function InventarioPage() {
@@ -22,6 +23,9 @@ export function InventarioPage() {
   // Datos
   const [existencias, setExistencias] = useState<any[]>([]);
   const [productos, setProductos] = useState<Producto[]>([]);
+  const [prodEditar, setProdEditar] = useState<any>(null);
+  const [catEditar, setCatEditar] = useState<any>(null);
+  const [loteEditar, setLoteEditar] = useState<any>(null);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [lotes, setLotes] = useState<Lote[]>([]);
   const [bajoMinimo, setBajoMinimo] = useState<any[]>([]);
@@ -152,6 +156,29 @@ export function InventarioPage() {
               render: (v) => v === 1
                 ? <Tag color="blue">Activo</Tag>
                 : <Tag>Inactivo</Tag> },
+                        { title: "Acciones", width: 120,
+              render: (_, p: Producto) => (
+                <SiPuede permiso="PRODUCTO_EDITAR">
+                  <Space>
+                    <Button size="small" icon={<EditOutlined />}
+                      onClick={() => { setProdEditar(p); setModalProd(true); }} />
+                    <Popconfirm title="¿Desactivar este producto?"
+                      onConfirm={async () => {
+                        try {
+                          await eliminarProducto(p.productoId);
+                          message.success("Producto desactivado");
+                          cargarTodo();
+                        } catch (e: any) {
+                          message.error(e?.response?.data?.message ?? "No se pudo");
+                        }
+                      }}
+                      okText="Sí" cancelText="No">
+                      <Button size="small" danger icon={<DeleteOutlined />} />
+                    </Popconfirm>
+                  </Space>
+                </SiPuede>
+              ) },
+            
           ]}
         />
       </div>
@@ -174,6 +201,28 @@ export function InventarioPage() {
             columns={[
               { title: "ID", dataIndex: "categoriaId", width: 60 },
               { title: "Nombre", dataIndex: "nombre" },
+              { title: "", width: 90,
+                render: (_, c: any) => (
+                  <SiPuede permiso="PRODUCTO_EDITAR">
+                    <Space>
+                      <Button size="small" icon={<EditOutlined />}
+                        onClick={() => { setCatEditar(c); setModalCat(true); }} />
+                      <Popconfirm title="¿Eliminar esta categoría?"
+                        onConfirm={async () => {
+                          try {
+                            await eliminarCategoria(c.categoriaId);
+                            message.success("Categoría eliminada");
+                            cargarTodo();
+                          } catch (e: any) {
+                            message.error(e?.response?.data?.message ?? "No se pudo eliminar");
+                          }
+                        }}
+                        okText="Sí" cancelText="No">
+                        <Button size="small" danger icon={<DeleteOutlined />} />
+                      </Popconfirm>
+                    </Space>
+                  </SiPuede>
+                ) },
             ]}
           />
         </div>
@@ -198,6 +247,29 @@ export function InventarioPage() {
                 render: (v) => productos.find((p) => p.productoId === v)?.nombre ?? "—" },
               { title: "Vence", dataIndex: "fechaVencimiento", width: 110,
                 render: (v) => dayjs(v).format("DD/MM/YYYY") },
+              { title: "", width: 90,
+                render: (_, l: any) => (
+                  <SiPuede permiso="PRODUCTO_EDITAR">
+                    <Space>
+                      <Button size="small" icon={<EditOutlined />}
+                        onClick={() => { setLoteEditar(l); setModalLote(true); }} />
+                      <Popconfirm title="¿Eliminar este lote?"
+                        description="Solo se puede si no tiene movimientos."
+                        onConfirm={async () => {
+                          try {
+                            await eliminarLote(l.loteId);
+                            message.success("Lote eliminado");
+                            cargarTodo();
+                          } catch (e: any) {
+                            message.error(e?.response?.data?.message ?? "No se pudo eliminar");
+                          }
+                        }}
+                        okText="Sí" cancelText="No">
+                        <Button size="small" danger icon={<DeleteOutlined />} />
+                      </Popconfirm>
+                    </Space>
+                  </SiPuede>
+                ) },
             ]}
           />
         </div>
@@ -233,9 +305,15 @@ export function InventarioPage() {
 
       {/* Modales */}
       <MovimientoModal abierto={modalMov} onCerrar={() => setModalMov(false)} onListo={cargarTodo} />
-      <CategoriaModal abierto={modalCat} onCerrar={() => setModalCat(false)} onListo={cargarTodo} />
-      <ProductoModal abierto={modalProd} onCerrar={() => setModalProd(false)} onListo={cargarTodo} />
-      <LoteModal abierto={modalLote} onCerrar={() => setModalLote(false)} onListo={cargarTodo} />
+      <CategoriaModal abierto={modalCat}
+        onCerrar={() => { setModalCat(false); setCatEditar(null); }}
+        onListo={cargarTodo} editar={catEditar} />
+      <ProductoModal abierto={modalProd}
+        onCerrar={() => { setModalProd(false); setProdEditar(null); }}
+        onListo={cargarTodo} editar={prodEditar} />
+      <LoteModal abierto={modalLote}
+        onCerrar={() => { setModalLote(false); setLoteEditar(null); }}
+        onListo={cargarTodo} editar={loteEditar} />
     </>
   );
 }

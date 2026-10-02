@@ -82,6 +82,12 @@ export async function crearCategoria(nombre: string): Promise<Categoria> {
   return data;
 }
 
+export const actualizarCategoria = async (id: number, nombre: string) =>
+  (await api.patch("/categorias/" + id, { nombre })).data;
+
+export const eliminarCategoria = async (id: number) =>
+  (await api.delete("/categorias/" + id)).data;
+
 // ---------- PRODUCTOS ----------
 export async function crearProducto(dto: {
   codigo: string;
@@ -93,6 +99,12 @@ export async function crearProducto(dto: {
   const { data } = await api.post("/productos", dto);
   return data;
 }
+
+export const actualizarProducto = async (id: number, dto: any) =>
+  (await api.patch("/productos/" + id, dto)).data;
+
+export const eliminarProducto = async (id: number) =>
+  (await api.delete("/productos/" + id)).data;
 
 // ---------- LOTES ----------
 export interface Lote {
@@ -115,6 +127,13 @@ export async function crearLote(dto: {
   const { data } = await api.post("/lotes", dto);
   return data;
 }
+
+export const actualizarLote = async (id: number, dto: any) =>
+  (await api.patch("/lotes/" + id, dto)).data;
+
+export const eliminarLote = async (id: number) =>
+  (await api.delete("/lotes/" + id)).data;
+
 
 // ---------- MOVIMIENTOS (dar entrada / salida de stock) ----------
 export async function registrarMovimiento(dto: {

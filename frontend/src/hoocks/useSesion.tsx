@@ -10,6 +10,8 @@ interface Sesion {
   puede: (permiso: string) => boolean;
   esSuperAdmin: boolean;
   recargar: () => void;
+  sucursalActiva: number | null;
+  cambiarSucursal: (id: number) => void;
 }
 
 const SesionContext = createContext<Sesion>({
@@ -18,11 +20,14 @@ const SesionContext = createContext<Sesion>({
   puede: () => false,
   esSuperAdmin: false,
   recargar: () => {},
+  sucursalActiva: null,
+  cambiarSucursal: () => {},
 });
 
 export function SesionProvider({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<PerfilUsuario | null>(null);
   const [cargando, setCargando] = useState(true);
+  const [sucursalActiva, setSucursalActiva] = useState<number | null>(null);
   const navigate = useNavigate();
 
     const cargar = async () => {
@@ -30,6 +35,8 @@ export function SesionProvider({ children }: { children: ReactNode }) {
     try {
       const perfil = await obtenerPerfil();
       setUsuario(perfil);
+      setSucursalActiva(perfil.sucursalId);
+      
     } catch (e: any) {
       // Solo sacar al usuario si de verdad no esta autenticado
       if (e?.response?.status === 401) {
@@ -53,6 +60,8 @@ export function SesionProvider({ children }: { children: ReactNode }) {
     puede: (permiso) => esSuperAdmin || (usuario?.permisos.includes(permiso) ?? false),
     esSuperAdmin,
     recargar: cargar,
+    sucursalActiva,
+    cambiarSucursal: setSucursalActiva,
   };
 
   return <SesionContext.Provider value={valor}>{children}</SesionContext.Provider>;

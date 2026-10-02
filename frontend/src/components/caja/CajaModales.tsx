@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Modal, Form, Input, InputNumber, Select, Alert, message } from "antd";
 import { abrirCorte, registrarMovimientoCaja, cerrarCorte } from "../../api/cash.api";
 import type { Corte } from "../../api/cash.api";
+import { useSesion } from "../../hoocks/useSesion";
 
 interface BaseProps {
   abierto: boolean;
@@ -16,6 +17,7 @@ export function AbrirTurnoModal({ abierto, onCerrar, onListo, cajaId, sucursalId
   BaseProps & { cajaId: number; sucursalId: number }) {
   const [form] = Form.useForm();
   const [guardando, setGuardando] = useState(false);
+  const { usuario } = useSesion();
 
   useEffect(() => { if (abierto) form.resetFields(); }, [abierto]);
 
@@ -23,7 +25,7 @@ export function AbrirTurnoModal({ abierto, onCerrar, onListo, cajaId, sucursalId
     try {
       const v = await form.validateFields();
       setGuardando(true);
-      await abrirCorte({ ...v, cajaId, sucursalId, usuarioId: 1 });
+      await abrirCorte({ ...v, cajaId, sucursalId, usuarioId: usuario?.usuarioId ?? 1 });
       message.success("Turno abierto");
       onListo();
       onCerrar();
@@ -118,6 +120,7 @@ export function CerrarTurnoModal({ abierto, onCerrar, onListo, corte, esperado }
   const [form] = Form.useForm();
   const [guardando, setGuardando] = useState(false);
   const [contado, setContado] = useState<number | null>(null);
+  const { usuario } = useSesion();  
 
   useEffect(() => {
     if (abierto) { form.resetFields(); setContado(null); }
@@ -132,7 +135,7 @@ export function CerrarTurnoModal({ abierto, onCerrar, onListo, corte, esperado }
       setGuardando(true);
       const r = await cerrarCorte(corte.corteId, {
         totalContado: v.totalContado,
-        usuarioId: 1,
+        usuarioId: usuario?.usuarioId ?? 1,
       });
       const msg = "Corte cerrado · " + r.estado +
         (r.diferencia !== 0 ? " de Q " + Math.abs(r.diferencia).toFixed(2) : "");

@@ -49,7 +49,7 @@ export function MovimientoModal({ abierto, onCerrar, onListo }: Props) {
       setGuardando(true);
       await registrarMovimiento({
         ...valores,
-        usuarioId:usuario?.usuarioId,   // TODO: tomarlo del usuario en sesión
+        usuarioId:usuario?.usuarioId?? 1,   // TODO: tomarlo del usuario en sesión
       });
       message.success("Movimiento registrado");
       onListo();

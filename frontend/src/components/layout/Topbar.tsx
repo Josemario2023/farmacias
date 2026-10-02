@@ -13,7 +13,8 @@ interface Props {
 export function Topbar({ onAbrirMenu }: Props) {
   const navigate = useNavigate();
   const cat = useCatalogos();
-  const { usuario } = useSesion();
+
+  const { usuario, sucursalActiva,cambiarSucursal } = useSesion();
 
   const nombre = usuario?.nombre ?? "Usuario";
   const rolTexto = usuario?.roles?.join(" · ") ?? "";
@@ -58,10 +59,12 @@ export function Topbar({ onAbrirMenu }: Props) {
         <span className="sep">/</span>
         <div className="sel">
           <IconSucursal />
-          <select defaultValue="">
-            <option value="">Todas las sucursales</option>
-            {cat.listaSucursales.map((s) => (
-              <option key={s.value} value={s.value}>{s.label}</option>
+          <select
+            value={sucursalActiva ?? ""}
+            onChange={(e) => cambiarSucursal(Number(e.target.value))}
+          >
+              {(usuario?.sucursales ?? []).map((s) => (
+              <option key={s.sucursalId} value={s.sucursalId}>{s.nombre}</option>
             ))}
           </select>
         </div>
