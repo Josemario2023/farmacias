@@ -17,3 +17,20 @@ export async function logout() {
   const { data } = await api.post("/auth/logout");
   return data;
 }
+
+export interface PerfilUsuario {
+  usuarioId: number;
+  username: string;
+  nombre: string;
+  sucursalId: number | null;
+  sucursalNombre: string | null;
+  regionId: number | null;
+  sucursales: { sucursalId: number; nombre: string; regionId: number }[];
+  roles: string[];
+  permisos: string[];
+}
+
+export async function obtenerPerfil(): Promise<PerfilUsuario> {
+  const { data } = await api.get("/auth/perfil");
+  return data;
+}

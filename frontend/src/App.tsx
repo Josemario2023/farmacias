@@ -10,32 +10,42 @@ import { InventarioPage } from "./pages/InventarioPage";
 import { PanelPage } from "./pages/PanelPage";
 import { CajaPage } from "./pages/CajaPage";
 import { AuditoriaPage } from "./pages/AuditoriaPage";
+import { CatalogosProvider } from "../src/hoocks/useCatalogos";
+import { SesionProvider } from "./hoocks/useSesion";
+import { AdminPage } from "./pages/AdminPage";
+
 
 function App() {
   return (
     <ConfigProvider theme={antdTheme} locale={esES}>
-      <AntApp>
-        <BrowserRouter>
+  <AntApp>
+    <BrowserRouter>
+      <SesionProvider>
         <Routes>
-          {/* El login NO lleva layout: es pantalla completa */}
           <Route path="/login" element={<LoginPage />} />
 
-          {/* Todo lo demás va DENTRO del layout */}
-          <Route element={<AppLayout />}>
+          <Route
+            element={
+              <CatalogosProvider>
+                <AppLayout />
+              </CatalogosProvider>
+            }
+          >
             <Route path="/pos" element={<PosPage />} />
-            <Route path="/kardex" element={<KardexPage />} />            
-            <Route path="/inventario" element={<InventarioPage />} />            
-            <Route path="/panel" element={<PanelPage />} />  
+            <Route path="/kardex" element={<KardexPage />} />
+            <Route path="/inventario" element={<InventarioPage />} />
+            <Route path="/panel" element={<PanelPage />} />
             <Route path="/caja" element={<CajaPage />} />
             <Route path="/auditoria" element={<AuditoriaPage />} />
+            <Route path="/usuarios" element={<AdminPage />} />
           </Route>
 
-          <Route path="*" element={<Navigate to="/login" />} />
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
-      </BrowserRouter>
-      </AntApp>
-      
-    </ConfigProvider>
+      </SesionProvider>
+    </BrowserRouter>
+  </AntApp>
+</ConfigProvider>
   );
 }
 

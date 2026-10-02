@@ -7,8 +7,13 @@ import { TipoMovimiento, LISTA_TIPOS, etiquetaTipo } from "../components/ui/Tipo
 import "../styles/components.css";
 import { BotonExportar } from "../components/ui/BotonExportar";
 import type { ColumnaCsv } from "../utils/exportar";
+import { useCatalogos } from "../hoocks/useCatalogos";
+
+
+
 
 export function KardexPage() {
+  const cat = useCatalogos();
   const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
   const [productos, setProductos] = useState<Producto[]>([]);
   const [cargando, setCargando] = useState(false);
@@ -120,7 +125,7 @@ export function KardexPage() {
             />
           </div>
 
-          <div className="f" style={{ minWidth: 120 }}>
+          <div className="f" style={{ minWidth: 150 }}>
             <label>Sucursal</label>
             <Select
               allowClear
@@ -128,23 +133,21 @@ export function KardexPage() {
               style={{ width: "100%" }}
               value={filtros.sucursalId}
               onChange={(v) => setFiltros({ ...filtros, sucursalId: v })}
-              options={[
-                { value: 1, label: "Sucursal 1" },
-                { value: 2, label: "Sucursal 2" },
-              ]}
+              options={cat.listaSucursales}
             />
           </div>
 
-          <div className="f" style={{ minWidth: 120 }}>
+          <div className="f" style={{ minWidth: 160 }}>
             <label>Usuario</label>
-            <Input
+            <Select
               allowClear
-              type="number"
-              placeholder="ID"
+              showSearch
+              optionFilterProp="label"
+              placeholder="Todos"
+              style={{ width: "100%" }}
               value={filtros.usuarioId}
-              onChange={(e) =>
-                setFiltros({ ...filtros, usuarioId: e.target.value ? Number(e.target.value) : undefined })
-              }
+              onChange={(v) => setFiltros({ ...filtros, usuarioId: v })}
+              options={cat.listaUsuarios}
             />
           </div>
 
@@ -211,7 +214,7 @@ export function KardexPage() {
                     <td>
                       {fmtFecha(m.fechaHora)}
                       <br />
-                      <small className="muted">Suc. {m.sucursalId}</small>
+                      <small className="muted">{cat.sucursal(m.sucursalId)}</small>
                     </td>
                     <td>
                       <TipoMovimiento tipo={m.tipoMovimiento} />
@@ -248,7 +251,7 @@ export function KardexPage() {
                       <b>{Number(m.stockNuevo)}</b>
                     </td>
                     <td>{m.documentoRef ?? "—"}</td>
-                    <td>{m.usuarioId}</td>
+                    <td>{cat.usuario(m.usuarioId)}</td>
                   </tr>
                 ))}
               </tbody>

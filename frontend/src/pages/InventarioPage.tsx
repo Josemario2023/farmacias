@@ -10,9 +10,14 @@ import type { Producto, Categoria, Lote } from "../api/inventory.api";
 import { MovimientoModal } from "../components/inventario/MovimientoModal";
 import { CategoriaModal, ProductoModal, LoteModal } from "../components/inventario/CatalogoModales";
 import "../styles/components.css";
+import { SiPuede } from "../components/ui/Sipuede";
+import { useCatalogos } from "../hoocks/useCatalogos";
+
 
 export function InventarioPage() {
   const [cargando, setCargando] = useState(false);
+  const cat = useCatalogos();
+
 
   // Datos
   const [existencias, setExistencias] = useState<any[]>([]);
@@ -104,7 +109,7 @@ export function InventarioPage() {
           size="middle"
           columns={[
             { title: "Sucursal", dataIndex: "sucursalId", width: 100,
-              render: (v) => "Sucursal " + v },
+              render: (v) => cat.sucursal(v) },
             { title: "Producto", dataIndex: "productoId",
               render: (v) => nombreProducto(v) },
             { title: "Lote", dataIndex: "loteId",
@@ -123,9 +128,11 @@ export function InventarioPage() {
       <div className="card" style={{ marginBottom: 16 }}>
         <div className="card-h">
           <h3>Productos</h3>
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalProd(true)}>
-            Nuevo producto
-          </Button>
+          <SiPuede permiso="PRODUCTO_EDITAR">
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalProd(true)}>
+              Nuevo producto
+            </Button>
+          </SiPuede>
         </div>
         <Table
           rowKey="productoId"
@@ -153,9 +160,11 @@ export function InventarioPage() {
         <div className="card">
           <div className="card-h">
             <h3>Categorías</h3>
-            <Button size="small" icon={<PlusOutlined />} onClick={() => setModalCat(true)}>
-              Nueva
-            </Button>
+            <SiPuede permiso="PRODUCTO_EDITAR">
+              <Button size="small" icon={<PlusOutlined />} onClick={() => setModalCat(true)}>
+                Nueva
+              </Button>
+            </SiPuede>
           </div>
           <Table
             rowKey="categoriaId"
@@ -172,9 +181,11 @@ export function InventarioPage() {
         <div className="card">
           <div className="card-h">
             <h3>Lotes</h3>
-            <Button size="small" icon={<PlusOutlined />} onClick={() => setModalLote(true)}>
-              Nuevo
-            </Button>
+            <SiPuede permiso="PRODUCTO_EDITAR">
+              <Button size="small" icon={<PlusOutlined />} onClick={() => setModalLote(true)}>
+                Nuevo
+              </Button>
+            </SiPuede>
           </div>
           <Table
             rowKey="loteId"
@@ -201,9 +212,11 @@ export function InventarioPage() {
           <h2>Inventario</h2>
           <p>Catálogo, existencias y movimientos de stock por lote.</p>
         </div>
-        <Button type="primary" size="large" icon={<PlusOutlined />} onClick={() => setModalMov(true)}>
-          Registrar movimiento
-        </Button>
+        <SiPuede permiso="INVENTARIO_MOVER">
+          <Button type="primary" size="large" icon={<PlusOutlined />} onClick={() => setModalMov(true)}>
+            Registrar movimiento
+          </Button>
+        </SiPuede>
       </div>
 
       {cargando ? (

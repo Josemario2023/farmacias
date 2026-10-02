@@ -3,16 +3,21 @@ import { Dropdown } from "antd";
 import type { MenuProps } from "antd";
 import { IconUbicacion, IconSucursal, IconBuscar, IconTema, IconCampana } from "./icons";
 import { logout } from "../../api/auth.api";
+import { useCatalogos } from "../../hoocks/useCatalogos";
+import { useSesion } from "../../hoocks/useSesion";
 
 interface Props {
   onAbrirMenu: () => void;
-  usuario?: string;
-  rol?: string;
 }
 
-export function Topbar({ onAbrirMenu, usuario = "Usuario", rol = "Operador" }: Props) {
-  const inicial = usuario.charAt(0).toUpperCase();
+export function Topbar({ onAbrirMenu }: Props) {
   const navigate = useNavigate();
+  const cat = useCatalogos();
+  const { usuario } = useSesion();
+
+  const nombre = usuario?.nombre ?? "Usuario";
+  const rolTexto = usuario?.roles?.join(" · ") ?? "";
+  const inicial = nombre.charAt(0).toUpperCase();
 
   const cambiarTema = () => {
     const html = document.documentElement;
@@ -43,17 +48,21 @@ export function Topbar({ onAbrirMenu, usuario = "Usuario", rol = "Operador" }: P
       <div className="scope">
         <div className="sel">
           <IconUbicacion />
-          <select defaultValue="todas">
-            <option value="todas">Todas las regiones</option>
-            <option value="1">Región Central</option>
+          <select defaultValue="">
+            <option value="">Todas las regiones</option>
+            {cat.listaRegiones.map((r) => (
+              <option key={r.value} value={r.value}>{r.label}</option>
+            ))}
           </select>
         </div>
         <span className="sep">/</span>
         <div className="sel">
           <IconSucursal />
-          <select defaultValue="1">
-            <option value="1">Sucursal 1</option>
-            <option value="2">Sucursal 2</option>
+          <select defaultValue="">
+            <option value="">Todas las sucursales</option>
+            {cat.listaSucursales.map((s) => (
+              <option key={s.value} value={s.value}>{s.label}</option>
+            ))}
           </select>
         </div>
       </div>
@@ -72,14 +81,13 @@ export function Topbar({ onAbrirMenu, usuario = "Usuario", rol = "Operador" }: P
           <IconCampana />
         </button>
 
-        {/* El usuario ahora abre un menú con "Cerrar sesión" */}
         <Dropdown menu={{ items: menuUsuario }} placement="bottomRight" trigger={["click"]}>
           <div className="user" style={{ cursor: "pointer" }}>
             <div className="avatar">{inicial}</div>
             <div className="u-meta">
-              <b>{usuario}</b>
+              <b>{nombre}</b>
               <br />
-              <small>{rol}</small>
+              <small>{rolTexto}</small>
             </div>
           </div>
         </Dropdown>

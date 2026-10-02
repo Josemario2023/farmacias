@@ -120,3 +120,27 @@ export function resumirCambio(r: {
 
   return tabla + " " + detalle + " · " + op;
 }
+
+// Traduce un valor que es un ID al nombre real, usando los catalogos
+export function traducirValor(
+  campo: string,
+  valor: string,
+  cat: {
+    usuario: (id: any) => string;
+    sucursal: (id: any) => string;
+    region: (id: any) => string;
+    producto: (id: any) => string;
+    lote: (id: any) => string;
+  },
+): string {
+  const c = campo.toLowerCase();
+
+  // Si el campo es un ID conocido, buscar su nombre
+  if (c === "usuario") return cat.usuario(valor);
+  if (c === "sucursal") return cat.sucursal(valor);
+  if (c === "región" || c === "region") return cat.region(valor);
+  if (c === "producto") return cat.producto(valor);
+  if (c === "lote") return cat.lote(valor);
+
+  return valor;
+}

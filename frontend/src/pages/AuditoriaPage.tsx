@@ -16,12 +16,15 @@ import { BotonExportar } from "../components/ui/BotonExportar";
 import type { ColumnaCsv } from "../utils/exportar";
 import { IconAuditoria, IconCaja, IconPos } from "../components/layout/icons";
 import "../styles/components.css";
+import { useCatalogos } from "../hoocks/useCatalogos";
+import { traducirValor } from "../utils/traducirAuditoria";
 
 const money = (n: number) =>
   "Q " + Number(n ?? 0).toLocaleString("es-GT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export function AuditoriaPage() {
   const [cargando, setCargando] = useState(true);
+  const cat = useCatalogos();
 
   const [hallazgos, setHallazgos] = useState<Hallazgo[]>([]);
   const [ventasRegion, setVentasRegion] = useState<any[]>([]);
@@ -77,10 +80,13 @@ export function AuditoriaPage() {
   const resolver = async (id: number, estado: string) => {
     try {
       await cambiarEstadoHallazgo(id, estado);
-      message.success("Hallazgo actualizado");
+      message.success("Hallazgo marcado como " + estado.toLowerCase());
       cargar();
-    } catch {
-      message.error("No se pudo actualizar el hallazgo");
+    } catch (e: any) {
+      // Mostrar el error REAL para poder diagnosticar
+      const msg = e?.response?.data?.message ?? e?.message ?? "Error desconocido";
+      message.error("No se pudo actualizar: " + msg);
+      console.error("Error al resolver hallazgo:", e);
     }
   };
 
@@ -102,7 +108,7 @@ export function AuditoriaPage() {
     return <div style={{ padding: 80, textAlign: "center" }}><Spin size="large" /></div>;
   }
 
-  // ==================== PESTAÑA 1: TABLEROS ====================
+  //  TABLEROS 
   const tabTableros = (
     <>
       <div className="kpi-grid">
@@ -175,7 +181,7 @@ export function AuditoriaPage() {
     </>
   );
 
-  // ==================== PESTAÑA 2: HALLAZGOS ====================
+  //  HALLAZGOS 
   const tabHallazgos = (
     <div className="card">
       <div className="card-h">
@@ -205,8 +211,14 @@ export function AuditoriaPage() {
           { title: "Tipo", dataIndex: "tipo", width: 190,
             render: (v) => v.replace(/_/g, " ") },
           { title: "Descripción", dataIndex: "descripcion" },
-          { title: "Ubicación", width: 130,
-            render: (_, h: Hallazgo) => "Región " + h.regionId + " · Suc. " + h.sucursalId },
+          { title: "Ubicación", width: 180,
+            render: (_, h: Hallazgo) => (
+              <>
+                {cat.sucursal(h.sucursalId)}
+                <br />
+                <small className="muted">{cat.region(h.regionId)}</small>
+              </>
+            ) },
           { title: "Monto", dataIndex: "monto", align: "right", width: 110,
             render: (v) => v ? money(v) : "—" },
           { title: "Fecha", dataIndex: "creadoEn", width: 130,
@@ -226,7 +238,7 @@ export function AuditoriaPage() {
     </div>
   );
 
-  // ==================== PESTAÑA 3: BITÁCORA ====================
+  // BITÁCORA 
   const tabBitacora = (
     <>
       {/* Resumen de actividad por tabla */}
@@ -353,20 +365,24 @@ export function AuditoriaPage() {
                 <h4 style={{ marginBottom: 8, color: "var(--muted)" }}>Valores anteriores</h4>
                 <Descriptions column={1} size="small" bordered style={{ marginBottom: 20 }}>
                   {descomponerJson(detalle.valoresAnteriores).map((c, i) => (
-                    <Descriptions.Item key={i} label={c.campo}>{c.valor}</Descriptions.Item>
+                    <Descriptions.Item key={i} label={c.campo}>
+                      {traducirValor(c.campo, c.valor, cat)}
+                    </Descriptions.Item>
                   ))}
                 </Descriptions>
               </>
             )}
-
-            <h4 style={{ marginBottom: 8, color: "var(--muted)" }}>
+                      <h4 style={{ marginBottom: 8, color: "var(--muted)" }}>
               {detalle.valoresAnteriores ? "Valores nuevos" : "Datos registrados"}
             </h4>
             <Descriptions column={1} size="small" bordered>
               {descomponerJson(detalle.valoresNuevos).map((c, i) => (
-                <Descriptions.Item key={i} label={c.campo}>{c.valor}</Descriptions.Item>
+                <Descriptions.Item key={i} label={c.campo}>
+                  {traducirValor(c.campo, c.valor, cat)}
+                </Descriptions.Item>
               ))}
             </Descriptions>
+            
           </>
         )}
       </Drawer>

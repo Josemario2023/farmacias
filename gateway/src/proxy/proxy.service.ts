@@ -30,36 +30,39 @@ export class ProxyService {
   }
 
   // Reenvia cualquier peticion al servicio que corresponda
-  async reenviar(
+    async reenviar(
     method: string,
     path: string,
     body?: any,
     query?: any,
     res?: Response,
+    usuario?: any,
   ): Promise<any> {
     const baseUrl = this.resolverDestino(path);
     const url = baseUrl + "/" + path;
 
+    // Propagar la identidad del usuario a los microservicios
+    const headers: any = {};
+    if (usuario) {
+      headers["x-usuario-id"] = String(usuario.sub);
+      headers["x-usuario-nombre"] = usuario.nombre ?? usuario.username;
+      headers["x-sucursal-id"] = String(usuario.sucursalId ?? "");
+      headers["x-region-id"] = String(usuario.regionId ?? "");
+    }
+
     try {
       const response = await firstValueFrom(
-        this.http.request({ method, url, data: body, params: query }),
+        this.http.request({ method, url, data: body, params: query, headers }),
       );
 
-      // Propagar la cookie si el servicio la envio (el login)
       const setCookie = response.headers["set-cookie"];
-      if (setCookie && res) {
-        res.setHeader("Set-Cookie", setCookie);
-      }
+      if (setCookie && res) res.setHeader("Set-Cookie", setCookie);
 
       return response.data;
     } catch (error) {
       const axiosError = error as AxiosError;
       if (axiosError.response) {
-        // Propagar el error del microservicio tal cual (mensaje y codigo)
-        throw new HttpException(
-          axiosError.response.data as any,
-          axiosError.response.status,
-        );
+        throw new HttpException(axiosError.response.data as any, axiosError.response.status);
       }
       throw new HttpException("El servicio no responde", 503);
     }

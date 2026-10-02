@@ -16,11 +16,14 @@ import {
 import "../styles/components.css";
 import { BotonExportar } from "../components/ui/BotonExportar";
 import type { ColumnaCsv } from "../utils/exportar";
+import { useCatalogos } from "../hoocks/useCatalogos";
+
 
 const money = (n: number) =>
   "Q " + Number(n).toLocaleString("es-GT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export function PanelPage() {
+  const cat = useCatalogos();
   const [cargando, setCargando] = useState(true);
 
   const [ventas, setVentas] = useState<any[]>([]);
@@ -163,7 +166,7 @@ export function PanelPage() {
               regiones.map((r) => (
                 <BarraRegion
                   key={r.regionId}
-                  etiqueta={"Región " + r.regionId + " · " + r.sucursales + " sucursal(es)"}
+                  etiqueta={cat.region(r.regionId) + " · " + r.sucursales + " sucursal(es)"}
                   valor={Number(r.totalVentas)}
                   maximo={maxRegion}
                 />
@@ -229,6 +232,7 @@ export function PanelPage() {
                 {ventas.slice(0, 5).map((v) => (
                   <tr key={v.ventaId}>
                     <td><b>{v.numero}</b></td>
+                    <td>{cat.sucursal(v.sucursalId)}</td>
                     <td>Suc. {v.sucursalId}</td>
                     <td>
                       <Tag color={v.estado === "PAGADA" ? "blue" : "default"}>{v.estado}</Tag>

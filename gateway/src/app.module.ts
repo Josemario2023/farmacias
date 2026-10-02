@@ -7,6 +7,7 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { ProxyModule } from "./proxy/proxy.module";
 import { JwtAuthGuard } from "./auth/jwt-auth.guard";
+import { PermisosGuard } from "./auth/permisos.guard";
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { JwtAuthGuard } from "./auth/jwt-auth.guard";
     AppService,
     { provide: APP_GUARD, useClass: ThrottlerGuard },   // rate limiting
     { provide: APP_GUARD, useClass: JwtAuthGuard },     // autenticacion JWT
+    { provide: APP_GUARD, useClass: PermisosGuard },
   ],
 })
 export class AppModule {}

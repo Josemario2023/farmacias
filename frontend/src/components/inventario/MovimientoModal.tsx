@@ -3,6 +3,8 @@ import { Modal, Form, Select, InputNumber, Input, message } from "antd";
 import { obtenerProductos, obtenerLotes, registrarMovimiento } from "../../api/inventory.api";
 import type { Producto, Lote } from "../../api/inventory.api";
 import { LISTA_TIPOS, etiquetaTipo } from "../ui/TipoMovimiento";
+import { useCatalogos } from "../../hoocks/useCatalogos";
+import { useSesion } from "../../hoocks/useSesion";
 
 interface Props {
   abierto: boolean;
@@ -11,10 +13,13 @@ interface Props {
 }
 
 export function MovimientoModal({ abierto, onCerrar, onListo }: Props) {
+ const cat=useCatalogos();
+ const {usuario} = useSesion();
   const [form] = Form.useForm();
   const [productos, setProductos] = useState<Producto[]>([]);
   const [lotes, setLotes] = useState<Lote[]>([]);
   const [guardando, setGuardando] = useState(false);
+  
 
   useEffect(() => {
     if (abierto) {
@@ -44,7 +49,7 @@ export function MovimientoModal({ abierto, onCerrar, onListo }: Props) {
       setGuardando(true);
       await registrarMovimiento({
         ...valores,
-        usuarioId: 1,   // TODO: tomarlo del usuario en sesión
+        usuarioId:usuario?.usuarioId,   // TODO: tomarlo del usuario en sesión
       });
       message.success("Movimiento registrado");
       onListo();
@@ -68,7 +73,7 @@ export function MovimientoModal({ abierto, onCerrar, onListo }: Props) {
       cancelText="Cancelar"
       width={520}
     >
-      <Form form={form} layout="vertical" initialValues={{ sucursalId: 1 }}>
+      <Form form={form} layout="vertical">
         <Form.Item
           name="tipoMovimiento"
           label="Tipo de movimiento"
@@ -116,13 +121,13 @@ export function MovimientoModal({ abierto, onCerrar, onListo }: Props) {
         <Form.Item
           name="sucursalId"
           label="Sucursal"
-          rules={[{ required: true }]}
+          rules={[{ required: true, message: "Selecciona una sucursal" }]}
         >
           <Select
-            options={[
-              { value: 1, label: "Sucursal 1" },
-              { value: 2, label: "Sucursal 2" },
-            ]}
+            placeholder="Selecciona"
+            options={cat.listaSucursales}
+            showSearch
+            optionFilterProp="label"
           />
         </Form.Item>
 

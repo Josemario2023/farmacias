@@ -14,13 +14,17 @@ import { BotonExportar } from "../components/ui/BotonExportar";
 import type { ColumnaCsv } from "../utils/exportar";
 import { IconCaja } from "../components/layout/icons";
 import "../styles/components.css";
+import { useCatalogos } from "../hoocks/useCatalogos";
 
 const money = (n: number | null | undefined) =>
   n === null || n === undefined
     ? "—"
     : "Q " + Number(n).toLocaleString("es-GT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  
+   
 
 export function CajaPage() {
+  const cat = useCatalogos();
   const [cargando, setCargando] = useState(true);
   const [cajas, setCajas] = useState<Caja[]>([]);
   const [cajaSel, setCajaSel] = useState<number | null>(null);
@@ -157,6 +161,10 @@ export function CajaPage() {
               <h3>
                 Turno {abierto.turno} · corte #{abierto.corteId}
                 <Tag color="blue" style={{ marginLeft: 10 }}>ABIERTO</Tag>
+                <br />
+                  <small style={{ fontWeight: 400, color: "var(--muted)", fontSize: 12.5 }}>
+                    Abierto por {cat.usuario(abierto.usuarioId)} · {cat.sucursal(abierto.sucursalId)}
+                  </small>
               </h3>
               <div style={{ display: "flex", gap: 8 }}>
                 <Button icon={<PlusOutlined />} onClick={() => setModalMov(true)}>
@@ -226,6 +234,8 @@ export function CajaPage() {
             { title: "#", dataIndex: "corteId", width: 60 },
             { title: "Caja", dataIndex: "cajaId", width: 70 },
             { title: "Turno", dataIndex: "turno", width: 100 },
+            { title: "Abrió", dataIndex: "usuarioId", width: 140,
+              render: (v) => cat.usuario(v) },
             { title: "Apertura", dataIndex: "montoApertura", align: "right", width: 110,
               render: (v) => money(v) },
             { title: "Sistema", dataIndex: "totalSistema", align: "right", width: 110,
