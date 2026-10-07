@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Button, Table, Tag, Spin, Empty, message, Select } from "antd";
+import { Button, Table, Tag, Spin, Empty, message, Select,Modal, Input } from "antd";
 import { PlusOutlined, LockOutlined, UnlockOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import {
-  obtenerCajas, obtenerCortes, verCorte, corteAbierto,
+  obtenerCajas, obtenerCortes, verCorte, corteAbierto, crearCaja
 } from "../api/cash.api";
 import type { Caja, Corte } from "../api/cash.api";
 import {
@@ -35,27 +35,34 @@ export function CajaPage() {
   const [modalAbrir, setModalAbrir] = useState(false);
   const [modalMov, setModalMov] = useState(false);
   const [modalCerrar, setModalCerrar] = useState(false);
+  const [modalCaja, setModalCaja] = useState(false);
+  const [nombreCaja, setNombreCaja] = useState("");
 
-  const { usuario } = useSesion();
-  const SUCURSAL = usuario?.sucursalId ?? 1;
+  const { sucursalActiva } = useSesion();
+  const SUCURSAL = sucursalActiva;
 
-  const cargar = async () => {
+ const cargar = async () => {
+    if (SUCURSAL == null) return;
     setCargando(true);
     try {
-      const cs = await obtenerCajas();
+      const cs = await obtenerCajas(SUCURSAL);
       setCajas(cs);
 
-      // Elegir la primera caja si aún no hay una seleccionada
-      const caja = cajaSel ?? cs[0]?.cajaId ?? null;
+      // Mantener la caja elegida solo si pertenece a esta sucursal; si no, la primera
+      const caja = cs.some((c) => c.cajaId === cajaSel)
+        ? cajaSel
+        : cs[0]?.cajaId ?? null;
       setCajaSel(caja);
 
       if (caja) {
         const ab = await corteAbierto(caja);
         // Si hay turno abierto, traerlo CON sus movimientos
         setAbierto(ab ? await verCorte(ab.corteId) : null);
+      } else {
+        setAbierto(null);
       }
 
-      const cortes = await obtenerCortes();
+      const cortes = await obtenerCortes(SUCURSAL);
       setHistorial(cortes);
     } catch {
       message.error("No se pudieron cargar los datos de caja");
@@ -64,7 +71,7 @@ export function CajaPage() {
     }
   };
 
-  useEffect(() => { cargar(); }, [cajaSel]);
+  useEffect(() => { cargar(); }, [cajaSel, SUCURSAL]);
 
   // ---------- Cálculo del saldo esperado ----------
   const movimientos = abierto?.movimientos ?? [];
@@ -87,7 +94,18 @@ export function CajaPage() {
     { titulo: "Diferencia", valor: (c) => c.diferencia !== null ? Number(c.diferencia).toFixed(2) : "" },
     { titulo: "Estado", valor: (c) => c.estado },
   ];
-
+  const guardarCaja = async () => {
+    if (SUCURSAL == null || !nombreCaja.trim()) return;
+    try {
+      await crearCaja({ sucursalId: SUCURSAL, nombre: nombreCaja.trim() });
+      message.success("Caja creada");
+      setModalCaja(false);
+      setNombreCaja("");
+      cargar();
+    } catch (e: any) {
+      message.error(e?.response?.data?.message ?? "No se pudo crear la caja");
+    }
+  };
   if (cargando) {
     return <div style={{ padding: 80, textAlign: "center" }}><Spin size="large" /></div>;
   }
@@ -143,6 +161,12 @@ export function CajaPage() {
             >
               Abrir turno
             </Button>
+            {cajas.length === 0 && (
+              <div style={{ marginTop: 12 }}>
+                <span className="muted">Esta sucursal no tiene cajas. </span>
+                <Button onClick={() => setModalCaja(true)}>Crear caja</Button>
+              </div>
+            )}
           </div>
         </div>
       ) : (
@@ -219,6 +243,7 @@ export function CajaPage() {
               </div>
             )}
           </div>
+            
         </>
       )}
 
@@ -262,7 +287,7 @@ export function CajaPage() {
       </div>
 
       {/* Modales */}
-      {cajaSel && (
+      {cajaSel && SUCURSAL != null && (
         <AbrirTurnoModal
           abierto={modalAbrir}
           onCerrar={() => setModalAbrir(false)}
@@ -286,8 +311,24 @@ export function CajaPage() {
             corte={abierto}
             esperado={esperado}
           />
-        </>
+        </>        
       )}
+      <Modal
+        title="Crear caja"
+        open={modalCaja}
+        okText="Crear"
+        cancelText="Cancelar"
+        onOk={guardarCaja}
+        onCancel={() => setModalCaja(false)}
+      >
+        <Input
+          placeholder="Ej. Caja 1"
+          maxLength={80}
+          value={nombreCaja}
+          onChange={(e) => setNombreCaja(e.target.value)}
+          onPressEnter={guardarCaja}
+        />
+      </Modal>
     </>
   );
 }

@@ -44,3 +44,33 @@ export async function obtenerVentas() {
   const { data } = await api.get("/ventas");
   return data;
 }
+
+export interface Cliente {
+  clienteId: number;
+  nombre: string;
+  identificacion: string; // NIT
+  direccion: string;
+  telefono: string | null;
+}
+
+export interface NuevoCliente {
+  nombre: string;
+  identificacion: string;
+  direccion: string;
+  telefono?: string;
+}
+
+// Busca por NIT exacto. El backend devuelve una lista; si no hay coincidencia, viene vacía.
+export async function buscarClientes(nit: string): Promise<Cliente[]> {
+  const { data } = await api.get("/clientes", { params: { nit } });
+  return data;
+}
+
+export async function crearCliente(cliente: NuevoCliente): Promise<Cliente> {
+  const { data } = await api.post("/clientes", cliente);
+  return data;
+}
+export async function obtenerClientes(): Promise<Cliente[]> {
+  const { data } = await api.get("/clientes");
+  return data;
+}

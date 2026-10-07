@@ -13,7 +13,8 @@ import { AuditoriaPage } from "./pages/AuditoriaPage";
 import { CatalogosProvider } from "../src/hoocks/useCatalogos";
 import { SesionProvider } from "./hoocks/useSesion";
 import { AdminPage } from "./pages/AdminPage";
-
+import { FacturacionPage } from "./pages/FacturacionPage";
+import { TrasladosPage } from "./pages/TrasladosPage";
 
 function App() {
   return (
@@ -38,6 +39,8 @@ function App() {
             <Route path="/caja" element={<CajaPage />} />
             <Route path="/auditoria" element={<AuditoriaPage />} />
             <Route path="/usuarios" element={<AdminPage />} />
+            <Route path="/facturacion" element={<FacturacionPage />} />
+            <Route path="/traslados" element={<TrasladosPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/login" replace />} />

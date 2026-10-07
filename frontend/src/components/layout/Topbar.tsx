@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+
 import { Dropdown } from "antd";
 import type { MenuProps } from "antd";
 import { IconUbicacion, IconSucursal, IconBuscar, IconTema, IconCampana } from "./icons";
@@ -11,10 +11,10 @@ interface Props {
 }
 
 export function Topbar({ onAbrirMenu }: Props) {
-  const navigate = useNavigate();
+
   const cat = useCatalogos();
 
-  const { usuario, sucursalActiva,cambiarSucursal } = useSesion();
+  const { usuario, sucursalActiva,cambiarSucursal, cerrarSesion } = useSesion();
 
   const nombre = usuario?.nombre ?? "Usuario";
   const rolTexto = usuario?.roles?.join(" · ") ?? "";
@@ -26,20 +26,20 @@ export function Topbar({ onAbrirMenu }: Props) {
     html.setAttribute("data-theme", actual === "dark" ? "light" : "dark");
   };
 
-  const cerrarSesion = async () => {
+    const salir = async () => {
     try {
-      await logout();
+      await logout();   // borra la cookie httpOnly en el servidor
     } catch {
-      // Aunque falle en el servidor, igual sacamos al usuario
+      // aunque falle en el servidor, sacamos al usuario igual
     }
-    navigate("/login");
+    cerrarSesion();     // limpia el estado en memoria + replace al login
   };
 
   // Menú que se abre al hacer clic en el usuario
   const menuUsuario: MenuProps["items"] = [
     { key: "perfil", label: "Mi perfil", disabled: true },
     { type: "divider" },
-    { key: "salir", label: "Cerrar sesión", danger: true, onClick: cerrarSesion },
+   { key: "salir", label: "Cerrar sesión", danger: true, onClick: salir },
   ];
 
   return (

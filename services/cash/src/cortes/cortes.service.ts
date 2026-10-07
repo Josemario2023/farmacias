@@ -19,8 +19,11 @@ export class CortesService {
   ) {}
 
   // ---------------- CAJAS (CRUD ) ----------------
-  listarCajas(): Promise<Caja[]> {
-    return this.cajaRepo.find({ order: { cajaId: "ASC" } });
+  listarCajas(sucursalId?: number): Promise<Caja[]> {
+    return this.cajaRepo.find({
+      where: sucursalId ? { sucursalId } : {},
+      order: { cajaId: "ASC" },
+    });
   }
 
   async crearCaja(dto: CreateCajaDto): Promise<Caja> {
@@ -29,8 +32,11 @@ export class CortesService {
   }
 
   // ---------------- CORTES ----------------
-  findAll(): Promise<CorteCaja[]> {
-    return this.corteRepo.find({ order: { corteId: "DESC" } });
+  findAll(sucursalId?: number): Promise<CorteCaja[]> {
+    return this.corteRepo.find({
+      where: sucursalId ? { sucursalId } : {},
+      order: { corteId: "DESC" },
+    });
   }
 
   async findOne(id: number): Promise<any> {

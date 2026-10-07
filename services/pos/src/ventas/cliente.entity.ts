@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
+
 @Entity({ name: "CLIENTE" })
 export class Cliente {
   @PrimaryGeneratedColumn({ name: "CLIENTE_ID" })
@@ -13,4 +14,7 @@ export class Cliente {
 
   @Column({ name: "TELEFONO", type: "varchar2", length: 30, nullable: true })
   telefono: string | null;
+
+  @Column({ name: "DIRECCION", type: "varchar2", length: 250, nullable: true })
+  direccion: string | null;
 }

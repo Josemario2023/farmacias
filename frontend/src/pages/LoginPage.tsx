@@ -1,10 +1,11 @@
-import { useState } from "react";
+import {useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CredencialesForm } from "../components/auth/CredencialesForm";
 import { OtpForm } from "../components/auth/OtpForm";
 import { login, verifyOtp } from "../api/auth.api";
 import "../styles/login.css";
 import logo from "../assets/logo.png";
+import { useSesion } from "../hoocks/useSesion";
 
 export function LoginPage() {
   // "paso" decide qué formulario se muestra en el panel derecho
@@ -14,35 +15,45 @@ export function LoginPage() {
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
+  const { recargar } = useSesion();
+  const enviando = useRef(false);
 
   // PASO 1: enviar usuario y contraseña
   const manejarCredenciales = async (user: string, password: string) => {
-    setCargando(true);
-    setError("");  
-    try {
-      await login(user, password);
-      setUsername(user);
-      setPaso("otp");            // cambia el formulario, la marca se queda
-    } catch (e: any) {
-      setError(e?.response?.data?.message ?? "Credenciales inválidas");
-    } finally {
-      setCargando(false);
-    }
-  };
+  if (enviando.current) return;
+  enviando.current = true;
+  setCargando(true);
+  setError("");
+  try {
+    await login(user, password);
+    setUsername(user);
+    setPaso("otp");            // cambia el formulario, la marca se queda
+  } catch (e: any) {
+    setError(e?.response?.data?.message ?? "Credenciales inválidas");
+  } finally {
+    enviando.current = false;
+    setCargando(false);
+  }
+};
 
   // PASO 2: enviar el código; el navegador recibe la cookie httpOnly
   const manejarOtp = async (codigo: string) => {
-    setCargando(true);
-    setError("");
-    try {
-      await verifyOtp(username, codigo);
-      navigate("/panel");
-    } catch (e: any) {
-      setError(e?.response?.data?.message ?? "Código inválido o expirado");
-    } finally {
-      setCargando(false);
-    }
-  };
+  if (enviando.current) return;
+  enviando.current = true;
+  setCargando(true);
+  setError("");
+  try {
+    await verifyOtp(username, codigo);
+    const ok = await recargar();
+    if (ok) navigate("/panel");
+    else setError("No se pudo cargar tu sesión. Intenta de nuevo.");
+  } catch (e: any) {
+    setError(e?.response?.data?.message ?? "Código inválido o expirado");
+  } finally {
+    enviando.current = false;
+    setCargando(false);
+  }
+};
 
   const volver = () => {
     setPaso("credenciales");

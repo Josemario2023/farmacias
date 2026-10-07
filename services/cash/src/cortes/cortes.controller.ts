@@ -1,4 +1,4 @@
-﻿import { Controller, Get, Post, Patch, Body, Param, ParseIntPipe } from "@nestjs/common";
+﻿import { Controller, Get, Post, Patch, Body, Param, Query, ParseIntPipe } from "@nestjs/common";
 import { CortesService } from "./cortes.service";
 import { CreateCajaDto, AbrirCorteDto, CreateMovimientoCajaDto, CerrarCorteDto } from "./cortes.dto";
 
@@ -7,15 +7,19 @@ export class CortesController {
   constructor(private readonly cortesService: CortesService) {}
 
   // ----- Cajas -----
-  @Get("cajas")
-  listarCajas() { return this.cortesService.listarCajas(); }
+    @Get("cajas")
+  listarCajas(@Query("sucursalId", new ParseIntPipe({ optional: true })) sucursalId?: number) {
+    return this.cortesService.listarCajas(sucursalId);
+  }
 
   @Post("cajas")
   crearCaja(@Body() dto: CreateCajaDto) { return this.cortesService.crearCaja(dto); }
 
   // ----- Cortes -----
-  @Get("cortes")
-  findAll() { return this.cortesService.findAll(); }
+@Get("cortes")
+  findAll(@Query("sucursalId", new ParseIntPipe({ optional: true })) sucursalId?: number) {
+    return this.cortesService.findAll(sucursalId);
+  }
 
   // Devuelve el corte CON sus movimientos
   @Get("cortes/:id")

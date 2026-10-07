@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
-import { Input, Button, Select, InputNumber, message, Empty, Tag, Modal, Alert } from "antd";
+import { Input, Button, Select, InputNumber, message, Empty, Tag, Modal, Alert, Form } from "antd";
 import { SearchOutlined, DeleteOutlined, ShoppingCartOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { obtenerProductos, obtenerLotes, obtenerExistencias } from "../api/inventory.api";
 import type { Producto, Lote } from "../api/inventory.api";
-import { crearVenta } from "../api/pos.api";
-import type { LineaVenta } from "../api/pos.api";
+import { crearVenta,crearCliente,buscarClientes } from "../api/pos.api";
+import type { LineaVenta,Cliente } from "../api/pos.api";
 import { obtenerCortes } from "../api/cash.api";
 import type { Corte } from "../api/cash.api";
 import "../styles/components.css";
 import { useSesion } from "../hoocks/useSesion";
+import { conIva } from "../utils/iva";
 
 interface ItemCarrito extends LineaVenta {
   numeroLote: string;
@@ -26,13 +27,19 @@ export function PosPage() {
   const [carrito, setCarrito] = useState<ItemCarrito[]>([]);
   const [formaPago, setFormaPago] = useState<"EFECTIVO" | "TARJETA" | "TRANSFERENCIA">("EFECTIVO");
   const [cobrando, setCobrando] = useState(false);
+  const [cliente, setCliente] = useState<Cliente | null>(null);
+  const [nit, setNit] = useState("");
+  const [buscandoNit, setBuscandoNit] = useState(false);
+  const [modalCliente, setModalCliente] = useState(false);
+  const [formCliente] = Form.useForm();
 
   const navigate = useNavigate();
-  const { usuario } = useSesion();
-  const SUCURSAL = usuario?.sucursalId ?? 1;   // TODO: tomarla del selector del topbar
+  const { usuario, sucursalActiva } = useSesion();
+  const SUCURSAL = sucursalActiva;  // TODO: tomarla del selector del topbar
 
   const cargar = async () => {
     try {
+      if (SUCURSAL == null) return;
       const [p, l, e, cortes] = await Promise.all([
         obtenerProductos(),
         obtenerLotes(),
@@ -49,7 +56,10 @@ export function PosPage() {
     }
   };
 
-  useEffect(() => { cargar(); }, []);
+    useEffect(() => {
+      setCarrito([]);
+      if (SUCURSAL != null) cargar();
+    }, [SUCURSAL]);
 
   // Stock disponible de un producto en esta sucursal (suma de sus lotes)
   const stockDe = (productoId: number) =>
@@ -98,7 +108,7 @@ export function PosPage() {
           loteId: existencia.loteId,
           descripcion: p.nombre,
           cantidad: 1,
-          precioUnitario: Number(p.precioBase),
+          precioUnitario: conIva(Number(p.precioBase)),
           numeroLote: lote?.numeroLote ?? "—",
           disponible: Number(existencia.cantidad),
           requiereReceta: p.requiereReceta === 1,
@@ -121,6 +131,48 @@ export function PosPage() {
     }
     setCarrito(carrito.map((c, i) => (i === idx ? { ...c, cantidad: cant } : c)));
   };
+   const buscarPorNit = async () => {
+    const valor = nit.trim();
+    if (!valor) return;
+    if (valor.toUpperCase() === "CF") {
+      setCliente(null);
+      return;
+    }
+    setBuscandoNit(true);
+    try {
+      const encontrados = await buscarClientes(valor);
+      if (encontrados.length > 0) {
+        setCliente(encontrados[0]);
+      } else {
+        formCliente.setFieldsValue({ identificacion: valor });
+        setModalCliente(true);
+      }
+    } catch {
+      message.error("No se pudo buscar el cliente");
+    } finally {
+      setBuscandoNit(false);
+    }
+  };
+
+  const guardarCliente = async () => {
+    try {
+      const valores = await formCliente.validateFields();
+      const nuevo = await crearCliente(valores);
+      setCliente(nuevo);
+      setNit(nuevo.identificacion);
+      setModalCliente(false);
+      formCliente.resetFields();
+      message.success("Cliente guardado");
+    } catch (e: any) {
+      // validateFields lanza un error sin "response"; en ese caso no mostramos nada extra
+      if (e?.response) message.error(e.response.data?.message ?? "No se pudo guardar el cliente");
+    }
+  };
+
+  const usarConsumidorFinal = () => {
+    setCliente(null);
+    setNit("");
+  };
 
   const quitar = (idx: number) => setCarrito(carrito.filter((_, i) => i !== idx));
 
@@ -128,12 +180,18 @@ export function PosPage() {
 
   const cobrar = async () => {
     if (carrito.length === 0) return;
+    // Sin sucursal activa no se puede vender
+      if (SUCURSAL == null) {
+        message.warning("Selecciona una sucursal antes de vender");
+        return;
+      }
 
-    // REGLA DE NEGOCIO: no se puede vender sin turno de caja abierto
-    if (!turno) {
-      message.warning("Abre un turno de caja antes de vender");
-      return;
-    }
+      // REGLA DE NEGOCIO: no se puede vender sin turno de caja abierto
+      if (!turno) {
+        message.warning("Abre un turno de caja antes de vender");
+        return;
+      }
+
 
     Modal.confirm({
       title: "Confirmar venta",
@@ -147,8 +205,9 @@ export function PosPage() {
           const venta = await crearVenta({
             numero,
             sucursalId: SUCURSAL,
-            usuarioId: usuario?.usuarioId ?? 1,
-            regionId: usuario?.regionId ?? 1,
+            usuarioId: usuario!.usuarioId,
+            regionId: usuario!.sucursales.find((s) => s.sucursalId === SUCURSAL)!.regionId,
+            clienteId: cliente?.clienteId,
             lineas: carrito.map((c) => ({
               productoId: c.productoId,
               loteId: c.loteId,
@@ -158,12 +217,18 @@ export function PosPage() {
             })),
             pagos: [{ formaPago, monto: total }],
           });
-
-          message.success(
-            "Venta " + venta.numero + " registrada. Stock descontado y factura emitida.",
-          );
           setCarrito([]);
+          usarConsumidorFinal();
           cargar();   // refrescar stock y estado de caja
+
+          Modal.success({
+            title: "Venta " + venta.numero + " registrada",
+            content: "Stock descontado. ¿Quieres imprimir la factura para el cliente?",
+            okText: "Ver / imprimir factura",
+            cancelText: "Nueva venta",
+            okCancel: true,
+            onOk: () => navigate("/facturacion?venta=" + venta.ventaId),
+          });          
         } catch (e: any) {
           message.error(e?.response?.data?.message ?? "No se pudo registrar la venta");
         } finally {
@@ -195,7 +260,7 @@ export function PosPage() {
           type="warning"
           showIcon
           style={{ marginBottom: 16 }}
-          message="No hay turno de caja abierto"
+          title="No hay turno de caja abierto"
           description="Debes abrir la caja antes de registrar ventas. De lo contrario el efectivo no quedaría registrado en ningún corte."
           action={
             <Button size="small" type="primary" onClick={() => navigate("/caja")}>
@@ -249,7 +314,7 @@ export function PosPage() {
                         )}
                       </small>
                     </div>
-                    <div className="precio">Q {Number(p.precioBase).toFixed(2)}</div>
+                     <div className="precio">Q {conIva(Number(p.precioBase)).toFixed(2)}</div>
                   </div>
                 );
               })}
@@ -318,7 +383,30 @@ export function PosPage() {
                   <span>Total</span>
                   <span>Q {total.toFixed(2)}</span>
                 </div>
-
+                 {/* CLIENTE: NIT -> buscar; vacío o "CF" = Consumidor final */}
+                <div style={{ marginBottom: 12 }}>
+                  <Input.Search
+                    placeholder="NIT del cliente (o CF)"
+                    enterButton="Buscar"
+                    value={nit}
+                    onChange={(e) => setNit(e.target.value)}
+                    onSearch={buscarPorNit}
+                    loading={buscandoNit}
+                    allowClear
+                  />
+                  <div style={{ marginTop: 6, fontSize: 13 }}>
+                    {cliente ? (
+                      <>
+                        <b>{cliente.nombre}</b> · {cliente.identificacion}
+                        <br />
+                        <small>{cliente.direccion}</small>{" "}
+                        <a className="link" onClick={usarConsumidorFinal}>Quitar</a>
+                      </>
+                    ) : (
+                      <small>Consumidor final</small>
+                    )}
+                  </div>
+                </div>
                 <Select
                   style={{ width: "100%", marginBottom: 12 }}
                   value={formaPago}
@@ -345,6 +433,29 @@ export function PosPage() {
           )}
         </div>
       </div>
+       <Modal
+        title="Cliente nuevo"
+        open={modalCliente}
+        okText="Guardar"
+        cancelText="Cancelar"
+        onOk={guardarCliente}
+        onCancel={() => { setModalCliente(false); formCliente.resetFields(); }}
+      >
+        <Form form={formCliente} layout="vertical">
+          <Form.Item name="identificacion" label="NIT" rules={[{ required: true, message: "El NIT es obligatorio" }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="nombre" label="Nombre" rules={[{ required: true, message: "El nombre es obligatorio" }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="direccion" label="Dirección" rules={[{ required: true, message: "La dirección es obligatoria" }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="telefono" label="Teléfono (opcional)">
+            <Input />
+          </Form.Item>
+        </Form>
+      </Modal>
     </>
   );
 }

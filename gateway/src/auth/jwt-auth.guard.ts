@@ -5,9 +5,9 @@ import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { Reflector } from "@nestjs/core";
 import { IS_PUBLIC_KEY } from "./public.decorator";
+import { COOKIE_NOMBRE, COOKIE_SESION } from "./cookie.config";
 
-// 10 minutos de inactividad
-const INACTIVITY_MS = 10 * 60 * 1000;
+
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -30,7 +30,7 @@ export class JwtAuthGuard implements CanActivate {
     const response = context.switchToHttp().getResponse();
 
     // 1) Buscar el token: primero en la cookie, luego en la cabecera (respaldo)
-    let token: string | undefined = request.cookies?.["token"];
+  let token: string | undefined = request.cookies?.[COOKIE_NOMBRE];
     if (!token) {
       const authHeader = request.headers["authorization"];
       if (authHeader && authHeader.startsWith("Bearer ")) {
@@ -49,12 +49,7 @@ export class JwtAuthGuard implements CanActivate {
       request.user = payload;
 
       // 3) RENOVAR la cookie: resetea los 10 min de inactividad
-      response.cookie("token", token, {
-        httpOnly: true,
-        sameSite: "lax",
-        secure: false,
-        maxAge: INACTIVITY_MS,
-      });
+      response.cookie(COOKIE_NOMBRE, token, COOKIE_SESION);
 
       return true;
     } catch {

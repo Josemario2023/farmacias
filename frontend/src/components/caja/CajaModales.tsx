@@ -25,7 +25,7 @@ export function AbrirTurnoModal({ abierto, onCerrar, onListo, cajaId, sucursalId
     try {
       const v = await form.validateFields();
       setGuardando(true);
-      await abrirCorte({ ...v, cajaId, sucursalId, usuarioId: usuario?.usuarioId ?? 1 });
+       await abrirCorte({ ...v, cajaId, sucursalId, usuarioId: usuario!.usuarioId });
       message.success("Turno abierto");
       onListo();
       onCerrar();
@@ -135,7 +135,7 @@ export function CerrarTurnoModal({ abierto, onCerrar, onListo, corte, esperado }
       setGuardando(true);
       const r = await cerrarCorte(corte.corteId, {
         totalContado: v.totalContado,
-        usuarioId: usuario?.usuarioId ?? 1,
+         usuarioId: usuario!.usuarioId,
       });
       const msg = "Corte cerrado · " + r.estado +
         (r.diferencia !== 0 ? " de Q " + Math.abs(r.diferencia).toFixed(2) : "");

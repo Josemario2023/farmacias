@@ -99,10 +99,7 @@ export function PanelPage() {
           <h2>Panel general</h2>
           <p>Resumen de la operación · {dayjs().format("dddd D [de] MMMM, YYYY")}</p>
         </div>
-        <Button icon={<ReloadOutlined />} onClick={actualizarConsolidado}>
-          Actualizar consolidado
-        </Button>
-                <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 8 }}>
           <BotonExportar
             nombreArchivo="ventas"
             columnas={columnasVentas}
@@ -232,8 +229,7 @@ export function PanelPage() {
                 {ventas.slice(0, 5).map((v) => (
                   <tr key={v.ventaId}>
                     <td><b>{v.numero}</b></td>
-                    <td>{cat.sucursal(v.sucursalId)}</td>
-                    <td>Suc. {v.sucursalId}</td>
+                    <td>{cat.sucursal(v.sucursalId)}</td>                   
                     <td>
                       <Tag color={v.estado === "PAGADA" ? "blue" : "default"}>{v.estado}</Tag>
                     </td>

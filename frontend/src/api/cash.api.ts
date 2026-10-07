@@ -31,8 +31,8 @@ export interface Corte {
   movimientos?: MovimientoCaja[];
 }
 
-export async function obtenerCajas(): Promise<Caja[]> {
-  const { data } = await api.get("/cajas");
+export async function obtenerCajas(sucursalId?: number): Promise<Caja[]> {
+  const { data } = await api.get("/cajas", { params: { sucursalId } });
   return data;
 }
 

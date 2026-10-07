@@ -59,16 +59,17 @@ export class FacturasService {
 
   // EMITIR FACTURA 
     async emitir(dto: EmitirFacturaDto): Promise<any> {
-    let subtotal = 0;
+    let total = 0;
     let impuesto = 0;
 
+    // El precio de venta YA incluye IVA: se desglosa, no se suma
     for (const l of dto.lineas) {
       const totalLinea = l.cantidad * l.precioUnitario;
-      const impLinea = l.impuesto ?? totalLinea * TASA_IMPUESTO;
-      subtotal += totalLinea;
+      const impLinea = l.impuesto ?? (totalLinea - totalLinea / (1 + TASA_IMPUESTO));
+      total += totalLinea;
       impuesto += impLinea;
     }
-    const total = subtotal + impuesto;
+    const subtotal = total - impuesto;
 
     const runner = this.dataSource.createQueryRunner();
     await runner.connect();
@@ -107,7 +108,7 @@ export class FacturasService {
       // Insertar las lineas en la MISMA transaccion
       for (const l of dto.lineas) {
         const totalLinea = l.cantidad * l.precioUnitario;
-        const impLinea = l.impuesto ?? totalLinea * TASA_IMPUESTO;
+        const impLinea = l.impuesto ?? (totalLinea - totalLinea / (1 + TASA_IMPUESTO));
         await runner.query(
           `INSERT INTO FACTURA_DETALLE
              (factura_id, producto_id, descripcion, cantidad, precio_unitario, impuesto, total)

@@ -9,9 +9,10 @@ interface Sesion {
   cargando: boolean;
   puede: (permiso: string) => boolean;
   esSuperAdmin: boolean;
-  recargar: () => void;
+  recargar: () => Promise<boolean>; 
   sucursalActiva: number | null;
   cambiarSucursal: (id: number) => void;
+  cerrarSesion: () => void;
 }
 
 const SesionContext = createContext<Sesion>({
@@ -19,9 +20,10 @@ const SesionContext = createContext<Sesion>({
   cargando: true,
   puede: () => false,
   esSuperAdmin: false,
-  recargar: () => {},
+  recargar: async () => false, 
   sucursalActiva: null,
   cambiarSucursal: () => {},
+  cerrarSesion: () => {},
 });
 
 export function SesionProvider({ children }: { children: ReactNode }) {
@@ -30,39 +32,59 @@ export function SesionProvider({ children }: { children: ReactNode }) {
   const [sucursalActiva, setSucursalActiva] = useState<number | null>(null);
   const navigate = useNavigate();
 
-    const cargar = async () => {
-    setCargando(true);
-    try {
-      const perfil = await obtenerPerfil();
-      setUsuario(perfil);
-      setSucursalActiva(perfil.sucursalId);
-      
-    } catch (e: any) {
-      // Solo sacar al usuario si de verdad no esta autenticado
-      if (e?.response?.status === 401) {
-        setUsuario(null);
-        navigate("/login");
-      }
-      // Otros errores (red, servicio caido): mantener la sesion
-    } finally {
-      setCargando(false);
+ const cargar = async (): Promise<boolean> => {
+  setCargando(true);
+  try {
+    const perfil: any = await obtenerPerfil();
+
+    // Solo es un usuario válido si trae identidad y roles.
+    // Cualquier otra cosa (null, { autenticado: false }, etc.) = sin sesión.
+    if (!perfil || perfil.autenticado === false || !Array.isArray(perfil.roles)) {
+      setUsuario(null);
+      navigate("/login");
+      return false;
     }
+    setUsuario(perfil);
+    setSucursalActiva(perfil.sucursalId ?? null);
+    return true;
+  } catch (e: any) {
+    if (e?.response?.status === 401) {
+      setUsuario(null);
+      navigate("/login");
+    }
+    // Otros errores (red, servicio caído): no sacar al usuario, pero tampoco hay sesión
+    return false;
+  } finally {
+    setCargando(false);
+  }
+
+  
+};
+
+const cerrarSesion = () => {
+    setUsuario(null);
+    setSucursalActiva(null);
+    
+    // asi "regresar" no vuelve a la sesion
+    navigate("/login", { replace: true });
   };
 
   useEffect(() => { cargar(); }, []);
 
-  const esSuperAdmin = usuario?.roles.includes("SUPERADMIN") ?? false;
+  // El "?." tambien protege a roles y permisos, no solo a usuario
+  const esSuperAdmin = usuario?.roles?.includes("SUPERADMIN") ?? false;
 
   const valor: Sesion = {
     usuario,
     cargando,
-    // El super admin puede todo, sin revisar permisos uno por uno
-    puede: (permiso) => esSuperAdmin || (usuario?.permisos.includes(permiso) ?? false),
+    puede: (permiso) => esSuperAdmin || (usuario?.permisos?.includes(permiso) ?? false),
     esSuperAdmin,
     recargar: cargar,
     sucursalActiva,
     cambiarSucursal: setSucursalActiva,
-  };
+    cerrarSesion,
+  }; 
+  
 
   return <SesionContext.Provider value={valor}>{children}</SesionContext.Provider>;
 }

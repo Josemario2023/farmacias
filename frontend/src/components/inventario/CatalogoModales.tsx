@@ -6,6 +6,7 @@ import {
   obtenerCategorias,actualizarCategoria,actualizarLote, obtenerProductos,
 } from "../../api/inventory.api";
 import type { Categoria, Producto } from "../../api/inventory.api";
+import { conIva } from "../../utils/iva";
 
 interface ModalProps {
   abierto: boolean;
@@ -125,10 +126,18 @@ export function ProductoModal({ abierto, onCerrar, onListo, editar }: ModalProps
           <Select placeholder="Selecciona"
                   options={categorias.map((c) => ({ value: c.categoriaId, label: c.nombre }))} />
         </Form.Item>
-        <Form.Item name="precioBase" label="Precio de venta"
+         <Form.Item name="precioBase" label="Precio base (sin IVA)"
                    rules={[{ required: true, message: "Indica el precio" }]}>
           <InputNumber min={0} step={0.01} precision={2} style={{ width: "100%" }}
                        prefix="Q" placeholder="0.00" />
+        </Form.Item>
+        <Form.Item noStyle shouldUpdate={(a, b) => a.precioBase !== b.precioBase}>
+          {({ getFieldValue }) => (
+            <p style={{ marginTop: -8 }}>
+              Precio al público con IVA 12%:{" "}
+              <b>Q {conIva(Number(getFieldValue("precioBase") ?? 0)).toFixed(2)}</b>
+            </p>
+          )}
         </Form.Item>
         <Form.Item name="requiereReceta" label="Requiere receta médica" valuePropName="checked"
                    extra="El POS advertirá al cajero antes de venderlo">

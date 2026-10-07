@@ -1,24 +1,23 @@
 import { Spin } from "antd";
 import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet,Navigate } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
 import { Topbar } from "./Topbar";
 import "../../styles/layout.css";
 import { useSesion } from "../../hoocks/useSesion";
 
-
-
 export function AppLayout() {
   const [menuAbierto, setMenuAbierto] = useState(false);
   const { cargando, usuario } = useSesion();
 
-  if (cargando || !usuario) {
-    return (
-      <div style={{ height: "100vh", display: "grid", placeItems: "center" }}>
-        <Spin size="large" />
-      </div>
-    );
-  }
+  if (cargando) {
+  return (
+    <div style={{ height: "100vh", display: "grid", placeItems: "center" }}>
+      <Spin size="large" />
+    </div>
+  );
+}
+  if (!usuario) return <Navigate to="/login" replace />;
 
   return (
     <>

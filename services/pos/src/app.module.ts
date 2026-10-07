@@ -8,6 +8,7 @@ import { VentasModule } from "./ventas/ventas.module";
 import { VentaDetalle } from "./ventas/venta-detalle.entity";
 import { Pago } from "./ventas/pago.entity";
 import { Cliente } from "./ventas/cliente.entity";
+import { ClientesModule } from "./clientes/clientes.module";
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { Cliente } from "./ventas/cliente.entity";
       }),
     }),
     VentasModule,
+    ClientesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

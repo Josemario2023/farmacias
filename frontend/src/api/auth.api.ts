@@ -30,7 +30,9 @@ export interface PerfilUsuario {
   permisos: string[];
 }
 
-export async function obtenerPerfil(): Promise<PerfilUsuario> {
+export async function obtenerPerfil(): Promise<PerfilUsuario | null> {
   const { data } = await api.get("/auth/perfil");
+  if (!data || data.autenticado === false) return null;
   return data;
 }
+

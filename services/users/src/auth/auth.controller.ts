@@ -1,6 +1,7 @@
 ﻿import { Controller, Post, Get, Body, Res, Req, UnauthorizedException } from "@nestjs/common";
 import type { Response, Request } from "express";
 import { AuthService } from "./auth.service";
+import { COOKIE_NOMBRE, COOKIE_BASE, COOKIE_SESION } from "./cookie.config";
 
 @Controller("auth")
 export class AuthController {
@@ -20,12 +21,7 @@ export class AuthController {
   ) {
     const r = await this.authService.verifyOtp(body.username, body.codigo);
 
-    res.cookie("token", r.access_token, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: false,
-      maxAge: 10 * 60 * 1000,
-    });
+    res.cookie(COOKIE_NOMBRE, r.access_token, COOKIE_SESION);
 
     // Devolver el perfil para que el frontend sepa quien entro
     return { mensaje: "Login exitoso", usuario: r.usuario };
@@ -43,7 +39,6 @@ export class AuthController {
 
   @Post("logout")
   logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie("token", { httpOnly: true, sameSite: "lax", secure: false });
-    return { mensaje: "Sesion cerrada" };
+    res.clearCookie(COOKIE_NOMBRE, COOKIE_BASE);
   }
 }

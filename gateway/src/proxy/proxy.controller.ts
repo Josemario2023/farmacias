@@ -1,24 +1,41 @@
-﻿import { All,Get, Controller, Body, Query, Req, Res } from "@nestjs/common";
+﻿import { All,Get,Post, Controller, Body, Query, Req, Res } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
 import type { Request, Response } from "express";
 import { ProxyService } from "./proxy.service";
 import { Public } from "../auth/public.decorator";
+import { COOKIE_NOMBRE, COOKIE_SESION } from "../auth/cookie.config";
+
 
 @Controller()
 export class ProxyController {
-  constructor(private readonly proxy: ProxyService) {}
+  constructor(private readonly proxy: ProxyService, private readonly jwt: JwtService,) {}
    // Perfil: SÍ requiere token (no lleva @Public)
-
+  @Public()
   @Get("auth/perfil")
-  perfil(
+  async perfil(
     @Req() req: Request,
     @Query() query: any,
     @Res({ passthrough: true }) res: Response,
   ) {
-    return this.proxy.reenviar("GET", "auth/perfil", undefined, query, res, (req as any).user);
+    const token = (req as any).cookies?.[COOKIE_NOMBRE];
+    if (!token) return { autenticado: false };
+
+    let payload: any;
+    try {
+      payload = await this.jwt.verifyAsync(token);
+    } catch {
+      return { autenticado: false };   // 
+    }
+    res.cookie(COOKIE_NOMBRE, token, COOKIE_SESION);
+    
+      const perfil = await this.proxy.reenviar(
+      "GET", "auth/perfil", undefined, query, res, payload,
+    );
+    return { autenticado: true, ...perfil };
   }
 
   @Public()
-  @All("auth/*path")
+  @Post(["auth/login", "auth/verify-otp", "auth/logout"])
   auth(
     @Req() req: Request,
     @Body() body: any,
