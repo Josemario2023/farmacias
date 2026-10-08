@@ -6,10 +6,11 @@ import { FormaPagoSucursal } from "./forma-pago.entity";
 import { Cotizacion } from "./cotizacion.entity";
 import { CotizacionesService } from "./cotizaciones.service";
 import { CotizacionesController } from "./cotizaciones.controller";
+import { CotizacionDetalle } from "./cotizacion-detalle.entity";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Disponibilidad, CoberturaSucursal, FormaPagoSucursal, Cotizacion]),
+    TypeOrmModule.forFeature([Disponibilidad, CoberturaSucursal, FormaPagoSucursal, Cotizacion,CotizacionDetalle]),
   ],
   controllers: [CotizacionesController],
   providers: [CotizacionesService],

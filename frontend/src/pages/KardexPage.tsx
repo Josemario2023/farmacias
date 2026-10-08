@@ -8,13 +8,16 @@ import "../styles/components.css";
 import { BotonExportar } from "../components/ui/BotonExportar";
 import type { ColumnaCsv } from "../utils/exportar";
 import { useCatalogos } from "../hoocks/useCatalogos";
+import { useAlcance } from "../hoocks/useAlcance";
 
 
 
 
 export function KardexPage() {
   const cat = useCatalogos();
-  const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
+  const alc = useAlcance();
+   const [movimientosBase, setMovimientos] = useState<Movimiento[]>([]);
+  const movimientos = movimientosBase.filter((m) => alc.dentro(m.sucursalId));
   const [productos, setProductos] = useState<Producto[]>([]);
   const [cargando, setCargando] = useState(false);
 
@@ -133,7 +136,7 @@ export function KardexPage() {
               style={{ width: "100%" }}
               value={filtros.sucursalId}
               onChange={(v) => setFiltros({ ...filtros, sucursalId: v })}
-              options={cat.listaSucursales}
+              options={alc.permitidas}
             />
           </div>
 

@@ -7,12 +7,14 @@ import type { Factura, Serie, FacturaDetalle } from "../api/billing.api";
 import { obtenerClientes } from "../api/pos.api";
 import type { Cliente } from "../api/pos.api";
 import { useCatalogos } from "../hoocks/useCatalogos";
+import { useAlcance } from "../hoocks/useAlcance";
 import "../styles/components.css";
 
 const Q = (n: number) => "Q " + Number(n).toFixed(2);
 
 export function FacturacionPage() {
   const cat = useCatalogos();
+  const alc = useAlcance();
   const [params, setParams] = useSearchParams();
   const [facturas, setFacturas] = useState<Factura[]>([]);
   const [series, setSeries] = useState<Serie[]>([]);
@@ -20,7 +22,8 @@ export function FacturacionPage() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [detalle, setDetalle] = useState<FacturaDetalle | null>(null);
   const [abriendo, setAbriendo] = useState(false);
-
+  const visibles = facturas.filter((f) => alc.dentro(f.sucursalId));
+  
   const cargar = async () => {
     setCargando(true);
     try {
@@ -116,7 +119,7 @@ export function FacturacionPage() {
       <div className="card">
         {cargando ? (
           <div style={{ padding: 60, textAlign: "center" }}><Spin /></div>
-        ) : facturas.length === 0 ? (
+        ) : visibles.length === 0 ? (
           <div className="empty">
             <b>Sin facturas</b>
             Todavía no se ha emitido ninguna factura.
@@ -136,7 +139,7 @@ export function FacturacionPage() {
                 </tr>
               </thead>
               <tbody>
-                {facturas.map((f) => (
+                {visibles.map((f) => (
                    <tr key={f.facturaId} onClick={() => abrirDetalle(f)} style={{ cursor: "pointer" }}>
                     <td><b>{numeroFactura(f)}</b></td>
                     <td>{cat.sucursal(f.sucursalId)}</td>

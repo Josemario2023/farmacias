@@ -12,25 +12,29 @@ import { CategoriaModal, ProductoModal, LoteModal } from "../components/inventar
 import "../styles/components.css";
 import { SiPuede } from "../components/ui/Sipuede";
 import { useCatalogos } from "../hoocks/useCatalogos";
+import { useAlcance } from "../hoocks/useAlcance";
 
 
 
 export function InventarioPage() {
   const [cargando, setCargando] = useState(false);
   const cat = useCatalogos();
+  const alc = useAlcance();
 
 
   // Datos
-  const [existencias, setExistencias] = useState<any[]>([]);
+  const [existenciasBase, setExistencias] = useState<any[]>([]);
   const [productos, setProductos] = useState<Producto[]>([]);
   const [prodEditar, setProdEditar] = useState<any>(null);
   const [catEditar, setCatEditar] = useState<any>(null);
   const [loteEditar, setLoteEditar] = useState<any>(null);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [lotes, setLotes] = useState<Lote[]>([]);
-  const [bajoMinimo, setBajoMinimo] = useState<any[]>([]);
-  const [porVencer, setPorVencer] = useState<any[]>([]);
-
+  const [bajoMinimoBase, setBajoMinimo] = useState<any[]>([]);
+  const [porVencerBase, setPorVencer] = useState<any[]>([]);
+  const existencias = existenciasBase.filter((e) => alc.dentro(e.sucursalId));
+  const bajoMinimo = bajoMinimoBase.filter((a) => alc.dentro(a.sucursalId));
+  const porVencer = porVencerBase.filter((a) => alc.dentro(a.sucursalId));
   // Modales
   const [modalMov, setModalMov] = useState(false);
   const [modalCat, setModalCat] = useState(false);

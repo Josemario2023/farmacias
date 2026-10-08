@@ -9,7 +9,7 @@ interface Catalogos {
   producto: (id: number | string) => string;
   lote: (id: number | string) => string;
 
-  listaSucursales: { value: number; label: string }[];
+   listaSucursales: { value: number; label: string; regionId: number }[];
   listaRegiones: { value: number; label: string }[];
   listaUsuarios: { value: number; label: string }[];
   listo: boolean;
@@ -33,7 +33,7 @@ export function CatalogosProvider({ children }: { children: ReactNode }) {
   const [regiones, setRegiones] = useState<Record<string, string>>({});
   const [productos, setProductos] = useState<Record<string, string>>({});
   const [lotes, setLotes] = useState<Record<string, string>>({});
-  const [listaSucursales, setListaSucursales] = useState<{ value: number; label: string }[]>([]);
+  const [listaSucursales, setListaSucursales] = useState<{ value: number; label: string; regionId: number }[]>([]);
   const [listaRegiones, setListaRegiones] = useState<{ value: number; label: string }[]>([]);
   const [listaUsuarios, setListaUsuarios] = useState<{ value: number; label: string }[]>([]);
   const [listo, setListo] = useState(false);
@@ -49,7 +49,7 @@ export function CatalogosProvider({ children }: { children: ReactNode }) {
         api.get("/lotes"),
       ]);
 
-      if (u.status === "fulfilled") {
+       if (u.status === "fulfilled") {
         const mapa: Record<string, string> = {};
         const lista: { value: number; label: string }[] = [];
         u.value.data.forEach((x: any) => {
@@ -62,16 +62,17 @@ export function CatalogosProvider({ children }: { children: ReactNode }) {
       }
 
 
-      if (s.status === "fulfilled") {
+       if (s.status === "fulfilled") {
         const mapa: Record<string, string> = {};
-        const lista: { value: number; label: string }[] = [];
+        const lista: { value: number; label: string; regionId: number }[] = [];
         s.value.data.forEach((x: any) => {
           mapa[x.sucursalId] = x.nombre;
-          if (x.activo === 1) lista.push({ value: x.sucursalId, label: x.nombre });
+          if (x.activo === 1) lista.push({ value: x.sucursalId, label: x.nombre, regionId: x.regionId });
         });
         setSucursales(mapa);
         setListaSucursales(lista);
       }
+      
       if (r.status === "fulfilled") {
         const mapa: Record<string, string> = {};
         const lista: { value: number; label: string }[] = [];

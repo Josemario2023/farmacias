@@ -11,6 +11,7 @@ import { SolicitarTrasladoModal } from "../components/traslados/SolicitarTraslad
 import { useCatalogos } from "../hoocks/useCatalogos";
 import { useSesion } from "../hoocks/useSesion";
 import "../styles/components.css";
+import { useAlcance } from "../hoocks/useAlcance";
 
 const COLOR: Record<EstadoTraslado, string> = {
   SOLICITADO: "blue",
@@ -24,8 +25,11 @@ export function TrasladosPage() {
   const cat = useCatalogos();
   const { usuario, puede } = useSesion();
   const puedeGestionar = puede("TRASLADO_AUTORIZAR");
-
+  const alc = useAlcance();
   const [traslados, setTraslados] = useState<Traslado[]>([]);
+   const visibles = traslados.filter(
+    (t) => alc.dentro(t.sucursalOrigenId) || alc.dentro(t.sucursalDestinoId),
+  );
   const [cargando, setCargando] = useState(false);
   const [modalSolicitar, setModalSolicitar] = useState(false);
 
@@ -169,7 +173,7 @@ export function TrasladosPage() {
       <div className="card">
         {cargando ? (
           <div style={{ padding: 60, textAlign: "center" }}><Spin /></div>
-        ) : traslados.length === 0 ? (
+        ) :visibles.length === 0 ?  (
           <div className="empty">
             <b>Sin traslados</b>
             Todavía no se ha solicitado ningún traslado.
@@ -188,7 +192,7 @@ export function TrasladosPage() {
                 </tr>
               </thead>
               <tbody>
-                {traslados.map((t) => (
+            {visibles.map((t) => (
                   <tr key={t.trasladoId} onClick={() => abrirDetalle(t)} style={{ cursor: "pointer" }}>
                     <td><b>{t.numero}</b></td>
                     <td>{cat.sucursal(t.sucursalOrigenId)}</td>

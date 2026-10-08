@@ -11,7 +11,9 @@ interface Sesion {
   esSuperAdmin: boolean;
   recargar: () => Promise<boolean>; 
   sucursalActiva: number | null;
-  cambiarSucursal: (id: number) => void;
+  regionActiva: number | null;
+  cambiarSucursal: (id: number | null) => void;
+  cambiarRegion: (id: number | null) => void;
   cerrarSesion: () => void;
 }
 
@@ -22,7 +24,9 @@ const SesionContext = createContext<Sesion>({
   esSuperAdmin: false,
   recargar: async () => false, 
   sucursalActiva: null,
+  regionActiva: null,
   cambiarSucursal: () => {},
+  cambiarRegion: () => {},
   cerrarSesion: () => {},
 });
 
@@ -30,6 +34,7 @@ export function SesionProvider({ children }: { children: ReactNode }) {
   const [usuario, setUsuario] = useState<PerfilUsuario | null>(null);
   const [cargando, setCargando] = useState(true);
   const [sucursalActiva, setSucursalActiva] = useState<number | null>(null);
+  const [regionActiva, setRegionActiva] = useState<number | null>(null);
   const navigate = useNavigate();
 
  const cargar = async (): Promise<boolean> => {
@@ -45,7 +50,9 @@ export function SesionProvider({ children }: { children: ReactNode }) {
       return false;
     }
     setUsuario(perfil);
-    setSucursalActiva(perfil.sucursalId ?? null);
+    const esSuper = perfil.roles.includes("SUPERADMIN");
+    setSucursalActiva(esSuper ? null : perfil.sucursalId ?? null);
+    setRegionActiva(esSuper ? null : perfil.regionId ?? null);
     return true;
   } catch (e: any) {
     if (e?.response?.status === 401) {
@@ -64,6 +71,7 @@ export function SesionProvider({ children }: { children: ReactNode }) {
 const cerrarSesion = () => {
     setUsuario(null);
     setSucursalActiva(null);
+    setRegionActiva(null);
     
     // asi "regresar" no vuelve a la sesion
     navigate("/login", { replace: true });
@@ -81,7 +89,9 @@ const cerrarSesion = () => {
     esSuperAdmin,
     recargar: cargar,
     sucursalActiva,
+     regionActiva,
     cambiarSucursal: setSucursalActiva,
+    cambiarRegion: (id) => { setRegionActiva(id); setSucursalActiva(null); },
     cerrarSesion,
   }; 
   

@@ -15,6 +15,8 @@ import { SesionProvider } from "./hoocks/useSesion";
 import { AdminPage } from "./pages/AdminPage";
 import { FacturacionPage } from "./pages/FacturacionPage";
 import { TrasladosPage } from "./pages/TrasladosPage";
+import { EntregasPage } from "./pages/EntregasPage";
+import { ActivosPage } from "./pages/ActivosPage";
 
 function App() {
   return (
@@ -41,6 +43,9 @@ function App() {
             <Route path="/usuarios" element={<AdminPage />} />
             <Route path="/facturacion" element={<FacturacionPage />} />
             <Route path="/traslados" element={<TrasladosPage />} />
+            <Route path="/entregas" element={<EntregasPage />} />
+            <Route path="/activos" element={<ActivosPage />} />
+
           </Route>
 
           <Route path="*" element={<Navigate to="/login" replace />} />

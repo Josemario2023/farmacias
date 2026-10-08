@@ -10,6 +10,7 @@ import { FormaPagoSucursal } from "./cotizaciones/forma-pago.entity";
 import { Cotizacion } from "./cotizaciones/cotizacion.entity";
 import { CotizacionesModule } from "./cotizaciones/cotizaciones.module";
 import { ConsumerService } from "./messaging/consumer.service";
+import { CotizacionDetalle } from "./cotizaciones/cotizacion-detalle.entity";
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { ConsumerService } from "./messaging/consumer.service";
         serviceName: config.get<string>("DB_SERVICE"),
         username: config.get<string>("DB_USER"),
         password: config.get<string>("DB_PASSWORD"),
-        entities: [Disponibilidad, CoberturaSucursal, FormaPagoSucursal,Cotizacion],
+        entities: [Disponibilidad, CoberturaSucursal, FormaPagoSucursal,Cotizacion, CotizacionDetalle],
         synchronize: false,
       }),
     }),

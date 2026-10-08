@@ -11,6 +11,7 @@ import type { Corte } from "../api/cash.api";
 import "../styles/components.css";
 import { useSesion } from "../hoocks/useSesion";
 import { conIva } from "../utils/iva";
+import { useCatalogos } from "../hoocks/useCatalogos";
 
 interface ItemCarrito extends LineaVenta {
   numeroLote: string;
@@ -35,6 +36,7 @@ export function PosPage() {
 
   const navigate = useNavigate();
   const { usuario, sucursalActiva } = useSesion();
+  const cat = useCatalogos();
   const SUCURSAL = sucursalActiva;  // TODO: tomarla del selector del topbar
 
   const cargar = async () => {
@@ -206,7 +208,7 @@ export function PosPage() {
             numero,
             sucursalId: SUCURSAL,
             usuarioId: usuario!.usuarioId,
-            regionId: usuario!.sucursales.find((s) => s.sucursalId === SUCURSAL)!.regionId,
+             regionId: cat.listaSucursales.find((s) => s.value === SUCURSAL)!.regionId,
             clienteId: cliente?.clienteId,
             lineas: carrito.map((c) => ({
               productoId: c.productoId,

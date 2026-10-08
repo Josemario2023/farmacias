@@ -3,8 +3,9 @@ import { Dropdown } from "antd";
 import type { MenuProps } from "antd";
 import { IconUbicacion, IconSucursal, IconBuscar, IconTema, IconCampana } from "./icons";
 import { logout } from "../../api/auth.api";
-import { useCatalogos } from "../../hoocks/useCatalogos";
+
 import { useSesion } from "../../hoocks/useSesion";
+import { useAlcance } from "../../hoocks/useAlcance";
 
 interface Props {
   onAbrirMenu: () => void;
@@ -12,9 +13,18 @@ interface Props {
 
 export function Topbar({ onAbrirMenu }: Props) {
 
-  const cat = useCatalogos();
+  
 
-  const { usuario, sucursalActiva,cambiarSucursal, cerrarSesion } = useSesion();
+  const { usuario,esSuperAdmin, sucursalActiva, regionActiva, cambiarSucursal, cambiarRegion, cerrarSesion } = useSesion();
+  const alc = useAlcance();
+
+  const elegirRegion = (valor: string) => {
+    const r = valor ? Number(valor) : null;
+    cambiarRegion(r);
+    // si la región tiene una sola sucursal, la dejamos elegida (POS y Caja la necesitan)
+    const deRegion = alc.permitidas.filter((s) => r == null || s.regionId === r);
+    if (deRegion.length === 1) cambiarSucursal(deRegion[0].value);
+  };
 
   const nombre = usuario?.nombre ?? "Usuario";
   const rolTexto = usuario?.roles?.join(" · ") ?? "";
@@ -46,27 +56,36 @@ export function Topbar({ onAbrirMenu }: Props) {
     <header className="topbar">
       <button className="hamb" onClick={onAbrirMenu} aria-label="Menú">☰</button>
 
-      <div className="scope">
-        <div className="sel">
-          <IconUbicacion />
-          <select defaultValue="">
-            <option value="">Todas las regiones</option>
-            {cat.listaRegiones.map((r) => (
-              <option key={r.value} value={r.value}>{r.label}</option>
-            ))}
-          </select>
-        </div>
-        <span className="sep">/</span>
+       <div className="scope">
+        {esSuperAdmin && (
+          <>
+            <div className="sel">
+              <IconUbicacion />
+              <select value={regionActiva ?? ""} onChange={(e) => elegirRegion(e.target.value)}>
+                <option value="">Todas las regiones</option>
+                {alc.regionesPermitidas.map((r) => (
+                  <option key={r.value} value={r.value}>{r.label}</option>
+                ))}
+              </select>
+            </div>
+            <span className="sep">/</span>
+          </>
+        )}
         <div className="sel">
           <IconSucursal />
-          <select
-            value={sucursalActiva ?? ""}
-            onChange={(e) => cambiarSucursal(Number(e.target.value))}
-          >
-              {(usuario?.sucursales ?? []).map((s) => (
-              <option key={s.sucursalId} value={s.sucursalId}>{s.nombre}</option>
-            ))}
-          </select>
+          {alc.sucursalesDeRegion.length > 1 ? (
+            <select
+              value={sucursalActiva ?? ""}
+              onChange={(e) => cambiarSucursal(e.target.value ? Number(e.target.value) : null)}
+            >
+              <option value="">Todas las sucursales</option>
+              {alc.sucursalesDeRegion.map((s) => (
+                <option key={s.value} value={s.value}>{s.label}</option>
+              ))}
+            </select>
+          ) : (
+            <span>{alc.sucursalesDeRegion[0]?.label ?? usuario?.sucursalNombre ?? "—"}</span>
+          )}
         </div>
       </div>
 

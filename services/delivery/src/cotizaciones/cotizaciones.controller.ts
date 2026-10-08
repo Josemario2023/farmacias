@@ -54,9 +54,16 @@ export class CotizacionesController {
   listarCotizaciones(@Query("estado") estado?: string) {
     return this.svc.listarCotizaciones(estado);
   }
+    @Get("cotizaciones/:id")
+  verCotizacion(@Param("id", ParseIntPipe) id: number) {
+    return this.svc.verCotizacion(id);
+  }
 
   @Patch("cotizaciones/:id/estado")
-  cambiarEstado(@Param("id", ParseIntPipe) id: number, @Body() body: { estado: string }) {
-    return this.svc.cambiarEstadoCotizacion(id, body.estado);
+  cambiarEstado(
+    @Param("id", ParseIntPipe) id: number,
+    @Body() body: { estado: string; formaPago?: string },
+  ) {
+    return this.svc.cambiarEstadoCotizacion(id, body.estado, body.formaPago);
   }
 }

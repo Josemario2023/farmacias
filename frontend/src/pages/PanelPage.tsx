@@ -17,21 +17,33 @@ import "../styles/components.css";
 import { BotonExportar } from "../components/ui/BotonExportar";
 import type { ColumnaCsv } from "../utils/exportar";
 import { useCatalogos } from "../hoocks/useCatalogos";
-
+import { useAlcance } from "../hoocks/useAlcance";
 
 const money = (n: number) =>
   "Q " + Number(n).toLocaleString("es-GT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export function PanelPage() {
   const cat = useCatalogos();
+  const alc = useAlcance();
   const [cargando, setCargando] = useState(true);
 
-  const [ventas, setVentas] = useState<any[]>([]);
-  const [facturas, setFacturas] = useState<any[]>([]);
-  const [hallazgos, setHallazgos] = useState<Hallazgo[]>([]);
-  const [regiones, setRegiones] = useState<any[]>([]);
-  const [bajoMinimo, setBajoMinimo] = useState<any[]>([]);
-  const [porVencer, setPorVencer] = useState<any[]>([]);
+  const [ventasBase, setVentas] = useState<any[]>([]);
+  const [facturasBase, setFacturas] = useState<any[]>([]);
+  const [hallazgosBase, setHallazgos] = useState<Hallazgo[]>([]);
+  const [regionesBase, setRegiones] = useState<any[]>([]);
+  const [bajoMinimoBase, setBajoMinimo] = useState<any[]>([]);
+  const [porVencerBase, setPorVencer] = useState<any[]>([]);
+  const ventas = ventasBase.filter((v) => alc.dentro(v.sucursalId));
+  const facturas = facturasBase.filter((f) => alc.dentro(f.sucursalId));
+  const hallazgos = hallazgosBase.filter((h) => alc.dentro(h.sucursalId));
+  const bajoMinimo = bajoMinimoBase.filter((a) => alc.dentro(a.sucursalId));
+  const porVencer = porVencerBase.filter((a) => alc.dentro(a.sucursalId));
+  // una región se muestra si alguna de sus sucursales está dentro del alcance
+  const regiones = regionesBase.filter(
+    (r) =>
+      !cat.listo ||
+      alc.permitidas.some((s) => s.regionId === r.regionId && alc.dentro(s.value)),
+  );
 
   const cargar = async () => {
     setCargando(true);
