@@ -13,6 +13,41 @@ const TABLAS: Record<string, string> = {
   ACTIVO_FIJO: "Activo fijo",
   ORDEN_COMPRA: "Orden de compra",
   TRASLADO: "Traslado",
+  // Usuarios y organización
+  PERMISO: "Permiso",
+  ROL_PERMISO: "Permiso de un rol",
+  USUARIO_SUCURSAL: "Sucursal asignada a usuario",
+  SUCURSAL: "Sucursal",
+  REGION: "Región",
+   // Inventario y catálogos
+  CATEGORIA: "Categoría de producto",
+  PROVEEDOR: "Proveedor",
+  PRECIO_SUCURSAL: "Precio por sucursal",
+  POLITICA_STOCK: "Política de stock",
+  CONFIG_INVENTARIO: "Configuración de inventario",
+  AJUSTE: "Ajuste de inventario",
+  AJUSTE_DETALLE: "Detalle de ajuste",
+  ORDEN_COMPRA_DETALLE: "Detalle de orden de compra",
+  TRASLADO_DETALLE: "Detalle de traslado",
+  // Activos fijos
+  CATEGORIA_ACTIVO: "Categoría de activo",
+  DEPRECIACION: "Depreciación",
+  // Entregas
+  COTIZACION: "Cotización de entrega",
+  COTIZACION_DETALLE: "Detalle de cotización",
+  COBERTURA_SUCURSAL: "Cobertura de entrega",
+  FORMA_PAGO_SUCURSAL: "Forma de pago por sucursal",
+   // Caja
+  CAJA: "Caja",
+  MOVIMIENTO_CAJA: "Movimiento de caja",
+  // Punto de venta y facturación
+  CLIENTE: "Cliente",
+  PAGO: "Pago de venta",
+  SERIE_FACTURA: "Serie de factura",
+  // Planilla
+  EMPLEADO: "Empleado",
+  PLANILLA: "Planilla",
+  PAGO_PLANILLA: "Pago de planilla",
 };
 
 // El módulo al que pertenece cada esquema
@@ -65,6 +100,20 @@ const CAMPOS: Record<string, string> = {
   total: "Total",
   entrada: "Entrada",
   salida: "Salida",
+   solicitado_por: "Solicitó",
+  autorizado_por: "Autorizó",
+  recibido_por: "Recibió",
+  cliente_id: "Cliente",
+  region_id: "Región",
+  rol_id: "Rol",
+  permiso_id: "Permiso",
+  empleado_id: "Empleado",
+  planilla_id: "Planilla",
+  periodo: "Periodo",
+  tipo: "Tipo",
+  monto_pagado: "Monto pagado",
+  total_pagado: "Total pagado",
+  fecha_pago: "Fecha de pago",
 };
 
 export const nombreTabla = (t: string) => TABLAS[t] ?? t.replace(/_/g, " ").toLowerCase();
@@ -136,7 +185,7 @@ export function traducirValor(
   const c = campo.toLowerCase();
 
   // Si el campo es un ID conocido, buscar su nombre
-  if (c === "usuario") return cat.usuario(valor);
+   if (["usuario", "solicitó", "autorizó", "recibió"].includes(c)) return cat.usuario(valor);
   if (c === "sucursal") return cat.sucursal(valor);
   if (c === "región" || c === "region") return cat.region(valor);
   if (c === "producto") return cat.producto(valor);

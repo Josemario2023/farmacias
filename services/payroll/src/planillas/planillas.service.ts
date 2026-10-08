@@ -112,6 +112,13 @@ export class PlanillasService {
 
     const empleado = await this.empleadoRepo.findOne({ where: { empleadoId: dto.empleadoId } });
     if (!empleado) throw new BadRequestException("El empleado " + dto.empleadoId + " no existe");
+     if (empleado.activo !== 1) {
+      throw new BadRequestException("El empleado " + empleado.nombre + " está dado de baja");
+    }
+    if (empleado.sucursalId !== planilla.sucursalId) {
+      throw new BadRequestException("El empleado no pertenece a la sucursal de esta planilla");
+    }
+
 
     // Guardar el pago
     const pago = await this.pagoRepo.save(

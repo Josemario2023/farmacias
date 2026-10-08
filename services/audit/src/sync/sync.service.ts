@@ -6,7 +6,9 @@ import * as sql from "mssql";
 
 @Injectable()
 export class SyncService implements OnModuleInit, OnModuleDestroy {
-  private pool: any;   // pool de conexiones a SQL Server
+  private pool: any; 
+  private temporizador?: NodeJS.Timeout;
+  private ocupado = false;   // pool de conexiones a SQL Server
 
   constructor(
     private readonly config: ConfigService,
@@ -23,16 +25,29 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
       password: this.config.get<string>("MSSQL_PASSWORD"),
       options: { trustServerCertificate: true, encrypt: false },
     });
-    console.log(">>> audit conectado a SQL Server (AUDITDB)");
+    //console.log(">>> audit conectado a SQL Server (AUDITDB)");
+     this.temporizador = setInterval(async () => {
+      if (this.ocupado) return;
+      this.ocupado = true;
+      try {
+        const r = await this.sincronizar();
+        if (r.enviadas > 0) console.log(">>> sync automático: " + r.enviadas + " registro(s)");
+      } catch (e: any) {
+        console.error(">>> sync automático falló:", e?.message ?? e);
+      } finally {
+        this.ocupado = false;
+      }
+    }, 60_000);
   }
 
   async onModuleDestroy() {
+     if (this.temporizador) clearInterval(this.temporizador);
     await this.pool?.close();
   }
 
-  // ============================================================
+  
   // LA SINCRONIZACION: Oracle -> SQL Server
-  // ============================================================
+
   async sincronizar(): Promise<any> {
     // ---- 1) Leer el watermark (hasta donde ya sincronizamos) ----
     const control = await this.oracleDs.query(
@@ -43,7 +58,7 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
     // ---- 2) Traer de Oracle SOLO lo nuevo (el delta) ----
     const filas = await this.oracleDs.query(
       `SELECT bitacora_id, origen_esquema, tabla, operacion, clave_pk,
-              valores_anteriores, valores_nuevos, usuario,
+               valores_anteriores, valores_nuevos, usuario, usuario_app,
               TO_CHAR(fecha_evento, 'YYYY-MM-DD HH24:MI:SS') AS fecha_evento
          FROM BITACORA_LOCAL
         WHERE bitacora_id > :1
@@ -68,7 +83,7 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
       request.input("clave_pk", sql.VarChar(100), f.CLAVE_PK);
       request.input("valores_anteriores", sql.NVarChar(sql.MAX), f.VALORES_ANTERIORES);
       request.input("valores_nuevos", sql.NVarChar(sql.MAX), f.VALORES_NUEVOS);
-      request.input("usuario", sql.VarChar(60), f.USUARIO);
+      request.input("usuario_app", sql.VarChar(30), f.USUARIO_APP);
       request.input("fecha_evento", sql.VarChar(30), f.FECHA_EVENTO);
 
       // MERGE: si ya existe esa fila (mismo origen), no hace nada; si no, la inserta.
@@ -84,9 +99,9 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
           AND destino.fecha_evento   = origen.fecha_evento
         WHEN NOT MATCHED THEN
           INSERT (origen_esquema, tabla, operacion, clave_pk,
-                  valores_anteriores, valores_nuevos, usuario, fecha_evento)
+                  valores_anteriores, valores_nuevos, usuario, usuario_app, fecha_evento)
           VALUES (@origen_esquema, @tabla, @operacion, @clave_pk,
-                  @valores_anteriores, @valores_nuevos, @usuario,
+                  @valores_anteriores, @valores_nuevos, @usuario, @usuario_app,
                   CONVERT(DATETIME2, @fecha_evento));
       `);
 

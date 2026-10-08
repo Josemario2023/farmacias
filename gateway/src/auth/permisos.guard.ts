@@ -1,7 +1,8 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { PERMISOS_KEY } from "./permisos.decorator";
-import { REGLAS_PERMISOS } from "./reglas.map";
+import { REGLAS_PERMISOS, REGLAS_ACCION} from "./reglas.map";
+
 
 @Injectable()
 export class PermisosGuard implements CanActivate {
@@ -45,6 +46,8 @@ export class PermisosGuard implements CanActivate {
   private resolverPorRegla(method: string, path: string): string[] | null {
     const ruta = path.replace(/^\//, "");
     const primerSegmento = ruta.split("/")[0];
+    const especial = REGLAS_ACCION.find((r) => r.metodo === method && r.patron.test(ruta));
+    if (especial) return [especial.permiso];
 
     const regla = REGLAS_PERMISOS[primerSegmento];
     if (!regla) return null;

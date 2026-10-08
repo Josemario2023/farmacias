@@ -276,6 +276,8 @@ export function AuditoriaPage() {
                 { value: "FRM_BILLING", label: "Facturación" },
                 { value: "FRM_CASH", label: "Caja" },
                 { value: "FRM_ASSETS", label: "Activos fijos" },
+                { value: "FRM_DELIVERY", label: "Entregas" },
+                { value: "FRM_PAYROLL", label: "Planilla" },
               ]} />
           </div>
           <div className="f" style={{ minWidth: 150 }}>
@@ -337,7 +339,8 @@ export function AuditoriaPage() {
                 const i = infoOperacion(v);
                 return <Tag color={i.color}>{i.label}</Tag>;
               } },
-            { title: "Registro", dataIndex: "clavePk", width: 90 },
+             { title: "Realizado por", dataIndex: "usuarioApp", width: 150,
+              render: (v) => v ? cat.usuario(v) : <span className="muted">Sistema</span> },
           ]}
         />
       </div>
@@ -357,7 +360,9 @@ export function AuditoriaPage() {
               <Descriptions.Item label="Fecha">
                 {dayjs(detalle.fechaEvento).format("DD/MM/YYYY HH:mm:ss")}
               </Descriptions.Item>
-              <Descriptions.Item label="Usuario de base">{detalle.usuarioBd}</Descriptions.Item>
+               <Descriptions.Item label="Realizado por">
+                {detalle.usuarioApp ? cat.usuario(detalle.usuarioApp) : "Sistema (proceso automático)"}
+              </Descriptions.Item>
             </Descriptions>
 
             {detalle.valoresAnteriores && (

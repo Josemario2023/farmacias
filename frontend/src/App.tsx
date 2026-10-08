@@ -17,6 +17,7 @@ import { FacturacionPage } from "./pages/FacturacionPage";
 import { TrasladosPage } from "./pages/TrasladosPage";
 import { EntregasPage } from "./pages/EntregasPage";
 import { ActivosPage } from "./pages/ActivosPage";
+import { PlanillaPage } from "./pages/PlanillaPage";
 
 function App() {
   return (
@@ -45,7 +46,7 @@ function App() {
             <Route path="/traslados" element={<TrasladosPage />} />
             <Route path="/entregas" element={<EntregasPage />} />
             <Route path="/activos" element={<ActivosPage />} />
-
+            <Route path="/planilla" element={<PlanillaPage />} />
           </Route>
 
           <Route path="*" element={<Navigate to="/login" replace />} />

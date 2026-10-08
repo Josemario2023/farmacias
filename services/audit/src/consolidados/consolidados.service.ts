@@ -147,7 +147,7 @@ export class ConsolidadosService {
              clave_pk           AS "clavePk",
              valores_anteriores AS "valoresAnteriores",
              valores_nuevos     AS "valoresNuevos",
-             usuario            AS "usuarioBd",
+             usuario_app        AS "usuarioApp",
              TO_CHAR(fecha_evento, 'YYYY-MM-DD"T"HH24:MI:SS') AS "fechaEvento"
         FROM BITACORA_LOCAL
        WHERE 1 = 1

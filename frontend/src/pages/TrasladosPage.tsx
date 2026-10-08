@@ -24,7 +24,9 @@ const COLOR: Record<EstadoTraslado, string> = {
 export function TrasladosPage() {
   const cat = useCatalogos();
   const { usuario, puede } = useSesion();
-  const puedeGestionar = puede("TRASLADO_AUTORIZAR");
+  const puedeSolicitar = puede("TRASLADO_SOLICITAR");
+  const puedeAutorizar = puede("TRASLADO_AUTORIZAR"); // autorizar, enviar y anular
+  const puedeRecibir = puede("TRASLADO_RECIBIR");
   const alc = useAlcance();
   const [traslados, setTraslados] = useState<Traslado[]>([]);
    const visibles = traslados.filter(
@@ -163,7 +165,7 @@ export function TrasladosPage() {
           <h2>Traslados</h2>
           <p>Movimiento de mercadería entre sucursales: solicitud, autorización, envío y recepción.</p>
         </div>
-        {puedeGestionar && (
+        {puedeSolicitar && (
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setModalSolicitar(true)}>
             Solicitar traslado
           </Button>
@@ -241,7 +243,7 @@ export function TrasladosPage() {
                     <td>{cat.lote(l.loteId)}</td>
                     <td className="num">{Number(l.cantSolicitada)}</td>
                     <td className="num">
-                      {editandoEnvio && puedeGestionar ? (
+                      {editandoRecepcion && puedeRecibir ? (
                         <InputNumber
                           size="small"
                           min={0}
@@ -255,7 +257,7 @@ export function TrasladosPage() {
                       )}
                     </td>
                     <td className="num">
-                      {editandoRecepcion && puedeGestionar ? (
+                      {editandoRecepcion && editandoEnvio ? ( //tengo duda
                         <InputNumber
                           size="small"
                           min={0}
@@ -272,22 +274,20 @@ export function TrasladosPage() {
               </tbody>
             </table>
 
-            {puedeGestionar && (
-              <div style={{ display: "flex", gap: 8, marginTop: 20 }}>
-                {detalle.estado === "SOLICITADO" && (
-                  <Button type="primary" onClick={autorizar}>Autorizar</Button>
-                )}
-                {detalle.estado === "AUTORIZADO" && (
-                  <Button type="primary" onClick={enviar}>Enviar</Button>
-                )}
-                {detalle.estado === "ENVIADO" && (
-                  <Button type="primary" onClick={recibir}>Recibir</Button>
-                )}
-                {(detalle.estado === "SOLICITADO" || detalle.estado === "AUTORIZADO") && (
-                  <Button danger onClick={anular}>Anular</Button>
-                )}
-              </div>
-            )}
+             <div style={{ display: "flex", gap: 8, marginTop: 20 }}>
+              {detalle.estado === "SOLICITADO" && puedeAutorizar && (
+                <Button type="primary" onClick={autorizar}>Autorizar</Button>
+              )}
+              {detalle.estado === "AUTORIZADO" && puedeAutorizar && (
+                <Button type="primary" onClick={enviar}>Enviar</Button>
+              )}
+              {detalle.estado === "ENVIADO" && puedeRecibir && (
+                <Button type="primary" onClick={recibir}>Recibir</Button>
+              )}
+              {(detalle.estado === "SOLICITADO" || detalle.estado === "AUTORIZADO") && puedeAutorizar && (
+                <Button danger onClick={anular}>Anular</Button>
+              )}
+            </div>
           </>
         )}
       </Drawer>

@@ -47,7 +47,7 @@ export interface RegistroBitacora {
   clavePk: string;
   valoresAnteriores: string | null;
   valoresNuevos: string | null;
-  usuarioBd: string;
+  usuarioApp: string | null;
   fechaEvento: string;
 }
 

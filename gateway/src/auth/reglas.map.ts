@@ -1,13 +1,13 @@
 
 export const REGLAS_PERMISOS: Record<string, { ver?: string; gestionar?: string }> = {
-  // ---------- Usuarios y organizacion ----------
+  // Usuarios y organizacion
   usuarios:    { ver: "USUARIOS_GESTIONAR",   gestionar: "USUARIOS_GESTIONAR" },
   roles:       { ver: "USUARIOS_GESTIONAR",   gestionar: "USUARIOS_GESTIONAR" },
   permisos:    { ver: "USUARIOS_GESTIONAR",   gestionar: "USUARIOS_GESTIONAR" },
   regiones:    { ver: "",                      gestionar: "SUCURSALES_GESTIONAR" },
   sucursales:  { ver: "",                      gestionar: "SUCURSALES_GESTIONAR" },
 
-  // ---------- Inventario ----------
+  // Inventario 
   categorias:        { ver: "INVENTARIO_VER", gestionar: "PRODUCTO_EDITAR" },
   productos:         { ver: "INVENTARIO_VER", gestionar: "PRODUCTO_EDITAR" },
   lotes:             { ver: "INVENTARIO_VER", gestionar: "PRODUCTO_EDITAR" },
@@ -22,18 +22,18 @@ export const REGLAS_PERMISOS: Record<string, { ver?: string; gestionar?: string 
   traslados:         { ver: "TRASLADO_VER",   gestionar: "TRASLADO_AUTORIZAR" },
   "traslados-formales": { ver: "TRASLADO_VER", gestionar: "TRASLADO_AUTORIZAR" },
 
-  // ---------- Ventas y facturacion ----------
+  // Ventas y facturacion 
   ventas:   { ver: "VENTA_CREAR",  gestionar: "VENTA_CREAR" },
   clientes: { ver: "VENTA_CREAR",  gestionar: "VENTA_CREAR" },
   facturas: { ver: "FACTURA_VER",  gestionar: "FACTURA_ANULAR" },
   series:   { ver: "FACTURA_VER",  gestionar: "FACTURA_ANULAR" },
 
-  // ---------- Caja ----------
+  // Caja 
   cajas:              { ver: "CAJA_VER",  gestionar: "CAJA_ABRIR" },
   cortes:             { ver: "CAJA_VER",  gestionar: "CAJA_ABRIR" },
   "movimientos-caja": { ver: "CAJA_VER",  gestionar: "CAJA_ABRIR" },
 
-  // ---------- Auditoria ----------
+  // Auditoria 
   eventos:      { ver: "AUDITORIA_VER" },
   consolidados: { ver: "AUDITORIA_VER", gestionar: "AUDITORIA_VER" },
   tableros:     { ver: "AUDITORIA_VER" },
@@ -41,13 +41,13 @@ export const REGLAS_PERMISOS: Record<string, { ver?: string; gestionar?: string 
   hallazgos:    { ver: "AUDITORIA_VER", gestionar: "AUDITORIA_RESOLVER" },
   sync:         { gestionar: "AUDITORIA_VER" },
 
-  // ---------- Entregas ----------
+  // - Entregas 
   cobertura:      { ver: "ENTREGA_VER", gestionar: "SUCURSALES_GESTIONAR" },
   "formas-pago":  { ver: "ENTREGA_VER", gestionar: "SUCURSALES_GESTIONAR" },
   disponibilidad: { ver: "ENTREGA_VER" },
   cotizaciones:   { ver: "ENTREGA_VER", gestionar: "ENTREGA_VER" },
 
-  // ---------- Planilla y activos ----------
+  //- Planilla y activos 
   empleados:        { ver: "PLANILLA_GESTIONAR", gestionar: "PLANILLA_GESTIONAR" },
   planillas:        { ver: "PLANILLA_GESTIONAR", gestionar: "PLANILLA_GESTIONAR" },
   "pagos-planilla": { gestionar: "PLANILLA_GESTIONAR" },
@@ -57,3 +57,8 @@ export const REGLAS_PERMISOS: Record<string, { ver?: string; gestionar?: string 
   depreciacion:           { gestionar: "ACTIVOS_GESTIONAR" },
   "activos-consolidado":  { ver: "ACTIVOS_GESTIONAR" },
 };
+//Estoy agregando las reglas de acción
+export const REGLAS_ACCION: { metodo: string; patron: RegExp; permiso: string }[] = [
+  { metodo: "POST", patron: /^traslados-formales\/?$/,               permiso: "TRASLADO_SOLICITAR" },
+  { metodo: "POST", patron: /^traslados-formales\/\d+\/recibir\/?$/, permiso: "TRASLADO_RECIBIR" },
+];
