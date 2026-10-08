@@ -92,3 +92,25 @@ export async function consolidarTodo() {
   const { data } = await api.post("/consolidados/todo");
   return data;
 }
+export async function ventasDetalle(desde: string, hasta: string) {
+  const { data } = await api.get("/tableros/ventas-detalle", { params: { desde, hasta } });
+  return data as {
+    fecha: string;
+    regionId: number;
+    sucursalId: number;
+    totalVentas: number;
+    cantidadVentas: number;
+  }[];
+}
+
+export async function cajaDetalle(desde: string, hasta: string) {
+  const { data } = await api.get("/tableros/caja-detalle", { params: { desde, hasta } });
+  return data as {
+    fecha: string;
+    regionId: number;
+    sucursalId: number;
+    totalIngresos: number;
+    totalEgresos: number;
+    diferencia: number;
+  }[];
+}

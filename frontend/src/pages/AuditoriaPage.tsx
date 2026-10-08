@@ -3,7 +3,7 @@ import { Tabs, Table, Tag, Button, Select, DatePicker, Spin, message, Empty, Dra
 import { ReloadOutlined, SyncOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import {
-  obtenerHallazgos, cambiarEstadoHallazgo, ventasPorRegion, cajaPorRegion,
+  obtenerHallazgos, cambiarEstadoHallazgo, ventasDetalle, cajaDetalle,
   obtenerBitacora, resumenBitacora, consolidarTodo, sincronizarBitacora,
 } from "../api/audit.api";
 import type { Hallazgo, RegistroBitacora } from "../api/audit.api";
@@ -18,6 +18,7 @@ import { IconAuditoria, IconCaja, IconPos } from "../components/layout/icons";
 import "../styles/components.css";
 import { useCatalogos } from "../hoocks/useCatalogos";
 import { traducirValor } from "../utils/traducirAuditoria";
+import { useAlcance } from "../hoocks/useAlcance";
 
 const money = (n: number) =>
   "Q " + Number(n ?? 0).toLocaleString("es-GT", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -25,10 +26,16 @@ const money = (n: number) =>
 export function AuditoriaPage() {
   const [cargando, setCargando] = useState(true);
   const cat = useCatalogos();
+  const alc = useAlcance();
 
   const [hallazgos, setHallazgos] = useState<Hallazgo[]>([]);
-  const [ventasRegion, setVentasRegion] = useState<any[]>([]);
-  const [cajaRegion, setCajaRegion] = useState<any[]>([]);
+  const [ventasDet, setVentasDet] = useState<any[]>([]);
+  const [cajaDet, setCajaDet] = useState<any[]>([]);
+  const [rango, setRango] = useState<[dayjs.Dayjs, dayjs.Dayjs]>([
+    dayjs().startOf("month"),
+    dayjs().endOf("month"),
+  ]);
+  const [agrupar, setAgrupar] = useState<"region" | "sucursal" | "mes">("region");
   const [bitacora, setBitacora] = useState<RegistroBitacora[]>([]);
   const [resumen, setResumen] = useState<any[]>([]);
 
@@ -42,27 +49,39 @@ export function AuditoriaPage() {
 
   const cargar = async () => {
     setCargando(true);
-    const hoy = dayjs().format("YYYY-MM-DD");
-    const inicioMes = dayjs().startOf("month").format("YYYY-MM-DD");
-
-    const [h, vr, cr, bi,rs] = await Promise.allSettled([
+    const [h, bi, rs] = await Promise.allSettled([
       obtenerHallazgos(),
-      ventasPorRegion(inicioMes, hoy),
-      cajaPorRegion(inicioMes, hoy),
       obtenerBitacora(),
       resumenBitacora(),
     ]);
 
     if (h.status === "fulfilled") setHallazgos(h.value);
-    if (vr.status === "fulfilled") setVentasRegion(vr.value);
-    if (cr.status === "fulfilled") setCajaRegion(cr.value);
     if (bi.status === "fulfilled") setBitacora(bi.value);
     if (rs.status === "fulfilled") setResumen(rs.value);
 
     setCargando(false);
   };
 
-  useEffect(() => { cargar(); }, []);
+  const cargarTableros = async () => {
+    const desde = rango[0].format("YYYY-MM-DD");
+    const hasta = rango[1].format("YYYY-MM-DD");
+    const [v, c] = await Promise.allSettled([
+      ventasDetalle(desde, hasta),
+      cajaDetalle(desde, hasta),
+    ]);
+    if (v.status === "fulfilled") setVentasDet(v.value);
+    if (c.status === "fulfilled") setCajaDet(c.value);
+  };
+
+  // Al abrir la página: consolidar lo pendiente y cargar todo
+  useEffect(() => {
+    consolidarTodo()
+      .catch(() => {})
+      .then(() => { cargar(); cargarTableros(); });
+  }, []);
+
+  // Al cambiar el período
+  useEffect(() => { cargarTableros(); }, [rango]);
 
   const filtrarBitacora = async () => {
     try {
@@ -83,7 +102,6 @@ export function AuditoriaPage() {
       message.success("Hallazgo marcado como " + estado.toLowerCase());
       cargar();
     } catch (e: any) {
-      // Mostrar el error REAL para poder diagnosticar
       const msg = e?.response?.data?.message ?? e?.message ?? "Error desconocido";
       message.error("No se pudo actualizar: " + msg);
       console.error("Error al resolver hallazgo:", e);
@@ -101,22 +119,97 @@ export function AuditoriaPage() {
 
   const abiertos = hallazgos.filter((h) => h.estado === "ABIERTO");
   const altos = abiertos.filter((h) => h.severidad === "ALTA");
-  const maxVentas = Math.max(...ventasRegion.map((r) => Number(r.totalVentas)), 1);
-  const diferenciaTotal = cajaRegion.reduce((a, r) => a + Number(r.diferenciaAcumulada ?? 0), 0);
+
+  // Solo lo que entra en el alcance de sucursales del usuario
+  const ventasFiltradas = ventasDet.filter((r) => alc.dentro(r.sucursalId));
+  const cajaFiltrada = cajaDet.filter((r) => alc.dentro(r.sucursalId));
+  const totalPeriodo = ventasFiltradas.reduce((a, r) => a + Number(r.totalVentas), 0);
+  const cantidadPeriodo = ventasFiltradas.reduce((a, r) => a + Number(r.cantidadVentas), 0);
+
+  // Ventas agrupadas como el usuario lo pida: región, sucursal o mes
+  const mapaVentas = new Map<string, { etiqueta: string; total: number; cant: number }>();
+  ventasFiltradas.forEach((r) => {
+    const clave =
+      agrupar === "mes" ? r.fecha.slice(0, 7)
+      : agrupar === "region" ? String(r.regionId)
+      : String(r.sucursalId);
+    const etiqueta =
+      agrupar === "mes" ? dayjs(clave + "-01").format("MMMM YYYY")
+      : agrupar === "region" ? cat.region(r.regionId)
+      : cat.sucursal(r.sucursalId);
+    const g = mapaVentas.get(clave) ?? { etiqueta, total: 0, cant: 0 };
+    g.total += Number(r.totalVentas);
+    g.cant += Number(r.cantidadVentas);
+    mapaVentas.set(clave, g);
+  });
+  const barras = Array.from(mapaVentas.entries())
+    .sort((a, b) => (agrupar === "mes" ? a[0].localeCompare(b[0]) : b[1].total - a[1].total))
+    .map(([, g]) => g);
+  const maxVentas = Math.max(...barras.map((b) => b.total), 1);
+
+  // Caja agrupada por sucursal
+  const mapaCaja = new Map<number, { regionId: number; ingresos: number; dif: number; dias: number }>();
+  cajaFiltrada.forEach((r) => {
+    const g = mapaCaja.get(r.sucursalId) ?? { regionId: r.regionId, ingresos: 0, dif: 0, dias: 0 };
+    g.ingresos += Number(r.totalIngresos);
+    g.dif += Number(r.diferencia);
+    g.dias += 1;
+    mapaCaja.set(r.sucursalId, g);
+  });
+  const cajaPorSucursal = Array.from(mapaCaja.entries())
+    .map(([sucursalId, g]) => ({ sucursalId, ...g }))
+    .sort((a, b) => a.dif - b.dif);
+  const diferenciaTotal = cajaPorSucursal.reduce((a, s) => a + s.dif, 0);
 
   if (cargando) {
     return <div style={{ padding: 80, textAlign: "center" }}><Spin size="large" /></div>;
   }
 
-  //  TABLEROS 
+  //  TABLEROS
   const tabTableros = (
     <>
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div className="toolbar">
+          <div className="f">
+            <label>Período</label>
+            <DatePicker.RangePicker
+              format="DD/MM/YYYY"
+              allowClear={false}
+              value={rango}
+              onChange={(v) => { if (v && v[0] && v[1]) setRango([v[0], v[1]]); }}
+              presets={[
+                { label: "Este mes", value: [dayjs().startOf("month"), dayjs().endOf("month")] },
+                { label: "Mes pasado", value: [
+                    dayjs().subtract(1, "month").startOf("month"),
+                    dayjs().subtract(1, "month").endOf("month"),
+                  ] },
+                { label: "Últimos 3 meses", value: [dayjs().subtract(2, "month").startOf("month"), dayjs().endOf("month")] },
+                { label: "Este año", value: [dayjs().startOf("year"), dayjs().endOf("year")] },
+              ]}
+            />
+          </div>
+          <div className="f" style={{ minWidth: 180 }}>
+            <label>Ver ventas por</label>
+            <Select
+              value={agrupar}
+              onChange={setAgrupar}
+              style={{ width: "100%" }}
+              options={[
+                { value: "region", label: "Región" },
+                { value: "sucursal", label: "Sucursal" },
+                { value: "mes", label: "Mes" },
+              ]}
+            />
+          </div>
+        </div>
+      </div>
+
       <div className="kpi-grid">
         <Kpi label="Hallazgos abiertos" valor={abiertos.length}
              chip={altos.length > 0 ? "chip-red" : "chip-violet"}
              detalle={altos.length + " de severidad alta"} icono={<IconAuditoria />} />
-        <Kpi label="Regiones con ventas" valor={ventasRegion.length}
-             chip="chip-green" detalle="consolidadas este mes" icono={<IconPos />} />
+        <Kpi label="Ventas del período" valor={money(totalPeriodo)}
+             chip="chip-green" detalle={cantidadPeriodo + " venta(s) consolidadas"} icono={<IconPos />} />
         <Kpi label="Descuadre acumulado" valor={money(diferenciaTotal)}
              chip={diferenciaTotal < 0 ? "chip-red" : "chip-blue"}
              detalle="suma de faltantes y sobrantes" icono={<IconCaja />} />
@@ -126,53 +219,52 @@ export function AuditoriaPage() {
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         <div className="card">
-          <div className="card-h"><h3>Ventas por región · este mes</h3></div>
+          <div className="card-h">
+            <h3>Ventas por {agrupar === "mes" ? "mes" : agrupar === "region" ? "región" : "sucursal"}</h3>
+          </div>
           <div style={{ padding: 18 }}>
-            {ventasRegion.length === 0 ? (
-              <Empty description="Sin consolidados" image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            {barras.length === 0 ? (
+              <Empty description="Sin ventas consolidadas en este período" image={Empty.PRESENTED_IMAGE_SIMPLE} />
             ) : (
-              ventasRegion.map((r) => (
-                <BarraRegion key={r.regionId}
-                  etiqueta={"Región " + r.regionId + " · " + r.cantidadVentas + " venta(s)"}
-                  valor={Number(r.totalVentas)} maximo={maxVentas} />
+              barras.map((b, i) => (
+                <BarraRegion key={i}
+                  etiqueta={b.etiqueta + " · " + b.cant + " venta(s)"}
+                  valor={b.total} maximo={maxVentas} />
               ))
             )}
           </div>
         </div>
 
         <div className="card">
-          <div className="card-h"><h3>Control de caja por región</h3></div>
+          <div className="card-h"><h3>Control de caja por sucursal</h3></div>
           <div className="tbl-wrap">
             <table className="tbl">
               <thead>
                 <tr>
+                  <th>Sucursal</th>
                   <th>Región</th>
-                  <th>Sucursales</th>
                   <th className="num">Ingresos</th>
                   <th className="num">Descuadre</th>
                 </tr>
               </thead>
               <tbody>
-                {cajaRegion.length === 0 ? (
+                {cajaPorSucursal.length === 0 ? (
                   <tr><td colSpan={4} style={{ textAlign: "center", padding: 24 }} className="muted">
-                    Sin consolidados de caja
+                    Sin cierres de caja en este período
                   </td></tr>
-                ) : cajaRegion.map((r) => {
-                  const dif = Number(r.diferenciaAcumulada ?? 0);
-                  return (
-                    <tr key={r.regionId}>
-                      <td><b>Región {r.regionId}</b></td>
-                      <td>{r.sucursales}</td>
-                      <td className="num">{money(r.totalIngresos)}</td>
-                      <td className="num">
-                        {dif === 0 ? <Tag color="green">Cuadrado</Tag>
-                          : <Tag color={dif < 0 ? "red" : "orange"}>
-                              {dif < 0 ? "Faltante " : "Sobrante "}{money(Math.abs(dif))}
-                            </Tag>}
-                      </td>
-                    </tr>
-                  );
-                })}
+                ) : cajaPorSucursal.map((s) => (
+                  <tr key={s.sucursalId}>
+                    <td><b>{cat.sucursal(s.sucursalId)}</b></td>
+                    <td>{cat.region(s.regionId)}</td>
+                    <td className="num">{money(s.ingresos)}</td>
+                    <td className="num">
+                      {s.dif === 0 ? <Tag color="green">Cuadrado</Tag>
+                        : <Tag color={s.dif < 0 ? "red" : "orange"}>
+                            {s.dif < 0 ? "Faltante " : "Sobrante "}{money(Math.abs(s.dif))}
+                          </Tag>}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -181,7 +273,7 @@ export function AuditoriaPage() {
     </>
   );
 
-  //  HALLAZGOS 
+  //  HALLAZGOS
   const tabHallazgos = (
     <div className="card">
       <div className="card-h">
@@ -238,7 +330,7 @@ export function AuditoriaPage() {
     </div>
   );
 
-  // BITÁCORA 
+  // BITÁCORA
   const tabBitacora = (
     <>
       {/* Resumen de actividad por tabla */}
@@ -339,7 +431,7 @@ export function AuditoriaPage() {
                 const i = infoOperacion(v);
                 return <Tag color={i.color}>{i.label}</Tag>;
               } },
-             { title: "Realizado por", dataIndex: "usuarioApp", width: 150,
+            { title: "Realizado por", dataIndex: "usuarioApp", width: 150,
               render: (v) => v ? cat.usuario(v) : <span className="muted">Sistema</span> },
           ]}
         />
@@ -360,7 +452,7 @@ export function AuditoriaPage() {
               <Descriptions.Item label="Fecha">
                 {dayjs(detalle.fechaEvento).format("DD/MM/YYYY HH:mm:ss")}
               </Descriptions.Item>
-               <Descriptions.Item label="Realizado por">
+              <Descriptions.Item label="Realizado por">
                 {detalle.usuarioApp ? cat.usuario(detalle.usuarioApp) : "Sistema (proceso automático)"}
               </Descriptions.Item>
             </Descriptions>
@@ -377,7 +469,7 @@ export function AuditoriaPage() {
                 </Descriptions>
               </>
             )}
-                      <h4 style={{ marginBottom: 8, color: "var(--muted)" }}>
+            <h4 style={{ marginBottom: 8, color: "var(--muted)" }}>
               {detalle.valoresAnteriores ? "Valores nuevos" : "Datos registrados"}
             </h4>
             <Descriptions column={1} size="small" bordered>
@@ -387,7 +479,6 @@ export function AuditoriaPage() {
                 </Descriptions.Item>
               ))}
             </Descriptions>
-            
           </>
         )}
       </Drawer>
@@ -404,6 +495,7 @@ export function AuditoriaPage() {
         <Button icon={<ReloadOutlined />} onClick={async () => {
           await consolidarTodo();
           cargar();
+          cargarTableros();
         }}>
           Actualizar consolidados
         </Button>
@@ -419,4 +511,4 @@ export function AuditoriaPage() {
       />
     </>
   );
-} 
+}

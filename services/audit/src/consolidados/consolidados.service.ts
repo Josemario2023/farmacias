@@ -19,12 +19,9 @@ export class ConsolidadosService {
     private readonly consInvRepo: Repository<ConsolidadoInventario>,
     @InjectDataSource()
     private readonly dataSource: DataSource,
-  
   ) {}
 
-  
   // CONSOLIDAR VENTAS de un día, agrupando por región y sucursal
- 
   async consolidarVentas(fecha: string): Promise<any> {
     // Agrupa los eventos SaleCreated de ese día
     const filas = await this.dataSource.query(
@@ -42,12 +39,13 @@ export class ConsolidadosService {
     const resultados: any[] = [];
 
     for (const f of filas) {
-      await this.consVentasRepo.delete({
-        fecha: new Date(fecha + "T12:00:00"),
-        sucursalId: Number(f.sucursalId),
-      });
+      await this.dataSource.query(
+        `DELETE FROM CONSOLIDADO_VENTAS
+          WHERE TRUNC(fecha) = TO_DATE(:1, 'YYYY-MM-DD') AND sucursal_id = :2`,
+        [fecha, Number(f.sucursalId)],
+      );
 
-       const consolidado = this.consVentasRepo.create({
+      const consolidado = this.consVentasRepo.create({
         fecha: new Date(fecha + "T12:00:00"),
         regionId: Number(f.regionId ?? 0),
         sucursalId: Number(f.sucursalId),
@@ -64,7 +62,8 @@ export class ConsolidadosService {
       consolidados: resultados,
     };
   }
-  //CONSOLIDAR CAJA
+
+  // CONSOLIDAR CAJA
   async consolidarCaja(fecha: string): Promise<any> {
     const filas = await this.dataSource.query(
       `SELECT NVL(region_id, 1)  AS "regionId",
@@ -84,10 +83,11 @@ export class ConsolidadosService {
 
     for (const f of filas) {
       // Recalcular: borrar el previo del día
-      await this.consCajaRepo.delete({
-        fecha: new Date(fecha + "T12:00:00"),
-        sucursalId: Number(f.sucursalId),
-      });
+      await this.dataSource.query(
+        `DELETE FROM CONSOLIDADO_CAJA
+          WHERE TRUNC(fecha) = TO_DATE(:1, 'YYYY-MM-DD') AND sucursal_id = :2`,
+        [fecha, Number(f.sucursalId)],
+      );
 
       const consolidado = this.consCajaRepo.create({
         fecha: new Date(fecha + "T12:00:00"),
@@ -109,20 +109,18 @@ export class ConsolidadosService {
     };
   }
 
-  
   // CONSOLIDAR INVENTARIO
-
-  
   async consolidarInventario(fecha: string, datos: {
     sucursalId: number;
     regionId: number;
     valorInventario: number;
     productosBajoMinimo: number;
   }): Promise<ConsolidadoInventario> {
-    await this.consInvRepo.delete({
-      fecha: new Date(fecha + "T12:00:00"),
-      sucursalId: datos.sucursalId,
-    });
+     await this.dataSource.query(
+      `DELETE FROM CONSOLIDADO_INVENTARIO
+        WHERE TRUNC(fecha) = TO_DATE(:1, 'YYYY-MM-DD') AND sucursal_id = :2`,
+      [fecha, datos.sucursalId],
+    );
 
     return this.consInvRepo.save(
       this.consInvRepo.create({
@@ -135,9 +133,7 @@ export class ConsolidadosService {
     );
   }
 
-
   // BITACORA: el registro de todos los cambios del sistema
-  
   async consultarBitacora(filtros: any): Promise<any[]> {
     let sql = `
       SELECT bitacora_id        AS "bitacoraId",
@@ -194,14 +190,12 @@ export class ConsolidadosService {
     );
   }
 
-
-
-  // CONSULTAS PARA TABLEROS 
+  // CONSULTAS PARA TABLEROS
 
   // Ventas consolidadas por región (el tablero de la dirección)
   async ventasPorRegion(fechaInicio: string, fechaFin: string): Promise<any[]> {
     return this.dataSource.query(
-        `SELECT region_id          AS "regionId",
+      `SELECT region_id          AS "regionId",
               SUM(total_ventas)    AS "totalVentas",
               SUM(num_ventas)      AS "cantidadVentas",
               COUNT(DISTINCT sucursal_id) AS "sucursales"
@@ -213,10 +207,42 @@ export class ConsolidadosService {
     );
   }
 
+  // Ventas consolidadas SIN agrupar: una fila por día, región y sucursal.
+  // La pantalla las agrupa por mes, región o sucursal como prefiera el usuario.
+  async ventasDetalle(desde: string, hasta: string): Promise<any[]> {
+    return this.dataSource.query(
+      `SELECT TO_CHAR(fecha, 'YYYY-MM-DD') AS "fecha",
+              region_id                    AS "regionId",
+              sucursal_id                  AS "sucursalId",
+              total_ventas                 AS "totalVentas",
+              num_ventas                   AS "cantidadVentas"
+         FROM CONSOLIDADO_VENTAS
+        WHERE fecha BETWEEN TO_DATE(:1,'YYYY-MM-DD') AND TO_DATE(:2,'YYYY-MM-DD')
+        ORDER BY fecha, sucursal_id`,
+      [desde, hasta],
+    );
+  }
+
+  // Caja consolidada SIN agrupar: una fila por día, región y sucursal
+  async cajaDetalle(desde: string, hasta: string): Promise<any[]> {
+    return this.dataSource.query(
+      `SELECT TO_CHAR(fecha, 'YYYY-MM-DD') AS "fecha",
+              region_id                    AS "regionId",
+              sucursal_id                  AS "sucursalId",
+              total_ingresos               AS "totalIngresos",
+              total_egresos                AS "totalEgresos",
+              diferencia                   AS "diferencia"
+         FROM CONSOLIDADO_CAJA
+        WHERE fecha BETWEEN TO_DATE(:1,'YYYY-MM-DD') AND TO_DATE(:2,'YYYY-MM-DD')
+        ORDER BY fecha, sucursal_id`,
+      [desde, hasta],
+    );
+  }
+
   // Detalle por sucursal dentro de una región
   async ventasPorSucursal(regionId: number, fechaInicio: string, fechaFin: string): Promise<any[]> {
     return this.dataSource.query(
-        `SELECT sucursal_id         AS "sucursalId",
+      `SELECT sucursal_id         AS "sucursalId",
               SUM(total_ventas)    AS "totalVentas",
               SUM(num_ventas)      AS "cantidadVentas"
          FROM CONSOLIDADO_VENTAS
@@ -227,8 +253,8 @@ export class ConsolidadosService {
       [regionId, fechaInicio, fechaFin],
     );
   }
-  
-  // Caja por región: 
+
+  // Caja por región:
   async cajaPorRegion(desde: string, hasta: string): Promise<any[]> {
     return this.dataSource.query(
       `SELECT region_id          AS "regionId",
@@ -274,17 +300,28 @@ export class ConsolidadosService {
       procesados.push(d.dia);
     }
 
-    return { mensaje: "Consolidacion completa", diasProcesados: procesados.length, dias: procesados };
+    // También la caja: un día por cada cierre de corte
+    const diasCaja = await this.dataSource.query(
+      `SELECT TO_CHAR(TRUNC(ocurrido_en), 'YYYY-MM-DD') AS "dia"
+         FROM EVENTO
+        WHERE tipo_evento = 'CorteCerrado'
+        GROUP BY TRUNC(ocurrido_en)
+        ORDER BY 1`,
+    );
+    for (const d of diasCaja) {
+      await this.consolidarCaja(d.dia);
+    }
+
+    return {
+      mensaje: "Consolidacion completa",
+      diasProcesados: procesados.length,
+      dias: procesados,
+      diasCaja: diasCaja.length,
+    };
   }
 
-
-
-
-
- 
   // HALLAZGOS
-  
-    async crearHallazgo(datos: {
+  async crearHallazgo(datos: {
     tipo: string;
     severidad: string;
     descripcion: string;
@@ -330,9 +367,4 @@ export class ConsolidadosService {
         GROUP BY severidad`,
     );
   }
-
-
-
-
-
 }

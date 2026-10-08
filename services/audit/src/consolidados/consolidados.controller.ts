@@ -19,6 +19,18 @@ export class ConsolidadosController {
   ventasPorRegion(@Query("desde") desde: string, @Query("hasta") hasta: string) {
     return this.svc.ventasPorRegion(desde, hasta);
   }
+   // GET /tableros/ventas-detalle?desde=2026-09-01&hasta=2026-10-31
+  @Get("tableros/ventas-detalle")
+  ventasDetalle(@Query("desde") desde: string, @Query("hasta") hasta: string) {
+    return this.svc.ventasDetalle(desde, hasta);
+  }
+
+  // GET /tableros/caja-detalle?desde=...&hasta=...
+  @Get("tableros/caja-detalle")
+  cajaDetalle(@Query("desde") desde: string, @Query("hasta") hasta: string) {
+    return this.svc.cajaDetalle(desde, hasta);
+  }
+
 
   // GET /tableros/ventas-sucursal/1?desde=...&hasta=...
   @Get("tableros/ventas-sucursal/:regionId")

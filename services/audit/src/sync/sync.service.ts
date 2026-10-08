@@ -83,6 +83,7 @@ export class SyncService implements OnModuleInit, OnModuleDestroy {
       request.input("clave_pk", sql.VarChar(100), f.CLAVE_PK);
       request.input("valores_anteriores", sql.NVarChar(sql.MAX), f.VALORES_ANTERIORES);
       request.input("valores_nuevos", sql.NVarChar(sql.MAX), f.VALORES_NUEVOS);
+      request.input("usuario", sql.VarChar(60), f.USUARIO);
       request.input("usuario_app", sql.VarChar(30), f.USUARIO_APP);
       request.input("fecha_evento", sql.VarChar(30), f.FECHA_EVENTO);
 

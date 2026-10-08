@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { Spin, Button, message, Empty, Tag } from "antd";
+import { Spin, Button, message, Empty, Tag,DatePicker, Select } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { obtenerVentas } from "../api/pos.api";
 import { obtenerFacturas } from "../api/billing.api";
-import { obtenerHallazgos, ventasPorRegion, consolidarVentas } from "../api/audit.api";
+import { obtenerHallazgos, ventasDetalle, consolidarTodo } from "../api/audit.api";
 import type { Hallazgo } from "../api/audit.api";
 import { alertasBajoMinimo, alertasPorVencer } from "../api/inventory.api";
 import { Kpi } from "../components/ui/Kpi";
@@ -30,7 +30,12 @@ export function PanelPage() {
   const [ventasBase, setVentas] = useState<any[]>([]);
   const [facturasBase, setFacturas] = useState<any[]>([]);
   const [hallazgosBase, setHallazgos] = useState<Hallazgo[]>([]);
-  const [regionesBase, setRegiones] = useState<any[]>([]);
+  const [ventasDet, setVentasDet] = useState<any[]>([]);
+  const [rango, setRango] = useState<[dayjs.Dayjs, dayjs.Dayjs]>([
+    dayjs().startOf("month"),
+    dayjs().endOf("month"),
+  ]);
+  const [agrupar, setAgrupar] = useState<"region" | "sucursal" | "mes">("region");
   const [bajoMinimoBase, setBajoMinimo] = useState<any[]>([]);
   const [porVencerBase, setPorVencer] = useState<any[]>([]);
   const ventas = ventasBase.filter((v) => alc.dentro(v.sucursalId));
@@ -39,23 +44,42 @@ export function PanelPage() {
   const bajoMinimo = bajoMinimoBase.filter((a) => alc.dentro(a.sucursalId));
   const porVencer = porVencerBase.filter((a) => alc.dentro(a.sucursalId));
   // una región se muestra si alguna de sus sucursales está dentro del alcance
-  const regiones = regionesBase.filter(
-    (r) =>
-      !cat.listo ||
-      alc.permitidas.some((s) => s.regionId === r.regionId && alc.dentro(s.value)),
-  );
+  const ventasFiltradas = ventasDet.filter((r) => alc.dentro(r.sucursalId));
+  const mapaVentas = new Map<string, { etiqueta: string; total: number; cant: number }>();
+  ventasFiltradas.forEach((r) => {
+    const clave =
+      agrupar === "mes" ? r.fecha.slice(0, 7)
+      : agrupar === "region" ? String(r.regionId)
+      : String(r.sucursalId);
+    const etiqueta =
+      agrupar === "mes" ? dayjs(clave + "-01").format("MMMM YYYY")
+      : agrupar === "region" ? cat.region(r.regionId)
+      : cat.sucursal(r.sucursalId);
+    const g = mapaVentas.get(clave) ?? { etiqueta, total: 0, cant: 0 };
+    g.total += Number(r.totalVentas);
+    g.cant += Number(r.cantidadVentas);
+    mapaVentas.set(clave, g);
+  });
+  const barras = Array.from(mapaVentas.entries())
+    .sort((a, b) => (agrupar === "mes" ? a[0].localeCompare(b[0]) : b[1].total - a[1].total))
+    .map(([, g]) => g);
+
+    const cargarVentas = async () => {
+    try {
+      setVentasDet(
+        await ventasDetalle(rango[0].format("YYYY-MM-DD"), rango[1].format("YYYY-MM-DD")),
+      );
+    } catch { /* si auditoría está caída, el resto del panel igual carga */ }
+  };
 
   const cargar = async () => {
     setCargando(true);
-    const hoy = dayjs().format("YYYY-MM-DD");
-    const inicioMes = dayjs().startOf("month").format("YYYY-MM-DD");
 
     // Promise.allSettled: si un servicio está caído, el resto igual carga
-    const [v, f, h, r, bm, pv] = await Promise.allSettled([
+    const [v, f, h, bm, pv] = await Promise.allSettled([
       obtenerVentas(),
       obtenerFacturas(),
       obtenerHallazgos({ estado: "ABIERTO" }),
-      ventasPorRegion(inicioMes, hoy),
       alertasBajoMinimo(),
       alertasPorVencer(60),
     ]);
@@ -63,21 +87,29 @@ export function PanelPage() {
     if (v.status === "fulfilled") setVentas(v.value);
     if (f.status === "fulfilled") setFacturas(f.value);
     if (h.status === "fulfilled") setHallazgos(h.value);
-    if (r.status === "fulfilled") setRegiones(r.value);
     if (bm.status === "fulfilled") setBajoMinimo(bm.value);
     if (pv.status === "fulfilled") setPorVencer(pv.value);
 
     setCargando(false);
   };
 
-  useEffect(() => { cargar(); }, []);
+  // Al abrir: consolidar lo pendiente y cargar todo
+  useEffect(() => {
+    consolidarTodo()
+      .catch(() => {})
+      .then(() => { cargar(); cargarVentas(); });
+  }, []);
+
+  // Al cambiar el período
+  useEffect(() => { cargarVentas(); }, [rango]);
 
   // Recalcula el consolidado del día y recarga
   const actualizarConsolidado = async () => {
     try {
-      await consolidarVentas(dayjs().format("YYYY-MM-DD"));
+       await consolidarTodo();
       message.success("Consolidado actualizado");
       cargar();
+      cargarVentas();
     } catch {
       message.error("No se pudo actualizar el consolidado");
     }
@@ -91,7 +123,7 @@ export function PanelPage() {
   const alertasStock = bajoMinimo.length + porVencer.length;
   const hallazgosAltos = hallazgos.filter((h) => h.severidad === "ALTA").length;
 
-  const maxRegion = Math.max(...regiones.map((r) => Number(r.totalVentas)), 1);
+   const maxRegion = Math.max(...barras.map((b) => b.total), 1);
 
   if (cargando) {
     return <div style={{ padding: 80, textAlign: "center" }}><Spin size="large" /></div>;
@@ -158,25 +190,51 @@ export function PanelPage() {
 
       {/* ---------- Ventas por región + Alertas ---------- */}
       <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: 16, marginBottom: 16 }}>
-        <div className="card">
+         <div className="card">
           <div className="card-h">
-            <h3>Ventas por región · este mes</h3>
-            <span className="muted" style={{ fontSize: 12.5 }}>
-              Consolidado desde los eventos
-            </span>
+            <h3>Ventas por {agrupar === "mes" ? "mes" : agrupar === "region" ? "región" : "sucursal"}</h3>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <DatePicker.RangePicker
+                size="small"
+                format="DD/MM/YYYY"
+                allowClear={false}
+                value={rango}
+                onChange={(v) => { if (v && v[0] && v[1]) setRango([v[0], v[1]]); }}
+                presets={[
+                  { label: "Este mes", value: [dayjs().startOf("month"), dayjs().endOf("month")] },
+                  { label: "Mes pasado", value: [
+                      dayjs().subtract(1, "month").startOf("month"),
+                      dayjs().subtract(1, "month").endOf("month"),
+                    ] },
+                  { label: "Últimos 3 meses", value: [dayjs().subtract(2, "month").startOf("month"), dayjs().endOf("month")] },
+                  { label: "Este año", value: [dayjs().startOf("year"), dayjs().endOf("year")] },
+                ]}
+              />
+              <Select
+                size="small"
+                value={agrupar}
+                onChange={setAgrupar}
+                style={{ width: 110 }}
+                options={[
+                  { value: "region", label: "Región" },
+                  { value: "sucursal", label: "Sucursal" },
+                  { value: "mes", label: "Mes" },
+                ]}
+              />
+            </div>
           </div>
           <div style={{ padding: 18 }}>
-            {regiones.length === 0 ? (
+            {barras.length === 0 ? (
               <Empty
-                description="Sin consolidados. Usa 'Actualizar consolidado'."
+                description="Sin ventas consolidadas en este período"
                 image={Empty.PRESENTED_IMAGE_SIMPLE}
               />
             ) : (
-              regiones.map((r) => (
+              barras.map((b, i) => (
                 <BarraRegion
-                  key={r.regionId}
-                  etiqueta={cat.region(r.regionId) + " · " + r.sucursales + " sucursal(es)"}
-                  valor={Number(r.totalVentas)}
+                  key={i}
+                  etiqueta={b.etiqueta + " · " + b.cant + " venta(s)"}
+                  valor={b.total}
                   maximo={maxRegion}
                 />
               ))
