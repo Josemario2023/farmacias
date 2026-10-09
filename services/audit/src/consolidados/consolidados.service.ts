@@ -285,7 +285,18 @@ export class ConsolidadosService {
   }
 
   // Consolida TODOS los dias que tengan eventos de venta
-  async consolidarTodo(): Promise<any> {
+  private enCurso: Promise<any> | null = null;
+
+  consolidarTodo(): Promise<any> {
+    if (!this.enCurso) {
+      this.enCurso = this.consolidarTodoInterno().finally(() => {
+        this.enCurso = null;
+      });
+    }
+    return this.enCurso;
+  }
+
+  private async consolidarTodoInterno(): Promise<any> {
     const dias = await this.dataSource.query(
       `SELECT TO_CHAR(TRUNC(ocurrido_en), 'YYYY-MM-DD') AS "dia"
          FROM EVENTO

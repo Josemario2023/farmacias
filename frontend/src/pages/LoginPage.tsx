@@ -67,7 +67,7 @@ export function LoginPage() {
         <div className="login-logo">
           <img src={logo} alt="Logo" className="login-logo-img" />
           <div>
-            <b>FarmaRed</b>
+            <b>SistemFarm</b>
             <small>Sistema integral de farmacias</small>
           </div>
         </div>

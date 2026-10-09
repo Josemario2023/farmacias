@@ -224,7 +224,9 @@ export function KardexPage() {
                       {m.observaciones && (
                         <>
                           <br />
-                          <small className="muted">{m.observaciones}</small>
+                          <small className="muted">
+                            {m.observaciones.replace(/sucursal (\d+)/gi, (_: string, id: string) => cat.sucursal(id))}
+                          </small>
                         </>
                       )}
                     </td>

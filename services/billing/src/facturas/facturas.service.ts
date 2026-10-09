@@ -41,9 +41,20 @@ export class FacturasService {
 
   // Busca la serie activa de una sucursal (para facturar automaticamente)
   async serieDeSucursal(sucursalId: number): Promise<SerieFactura | null> {
-    return this.serieRepo.findOne({ where: { sucursalId, activo: 1 } });
-  }
+    const activa = await this.serieRepo.findOne({ where: { sucursalId, activo: 1 } });
+    if (activa) return activa;
 
+    // Sucursal nueva (sin NINGUNA serie): se crea la serie "A" automaticamente.
+    // Si ya tiene series pero todas estan inactivas, se respeta esa decision.
+    const alguna = await this.serieRepo.findOne({ where: { sucursalId } });
+    if (alguna) return null;
+    try {
+      return await this.crearSerie({ sucursalId, serie: "A" });
+    } catch {
+      // Otra venta la creó en el mismo instante: se usa la que ya existe
+      return this.serieRepo.findOne({ where: { sucursalId, activo: 1 } });
+    }
+  }
   // ---------------- FACTURAS ----------------
   findAll(): Promise<Factura[]> {
     return this.facturaRepo.find({ order: { facturaId: "DESC" } });

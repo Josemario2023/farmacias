@@ -3,7 +3,7 @@ import { Dropdown } from "antd";
 import type { MenuProps } from "antd";
 import { IconUbicacion, IconSucursal, IconBuscar, IconTema, IconCampana } from "./icons";
 import { logout } from "../../api/auth.api";
-
+import { useNavigate } from "react-router-dom";
 import { useSesion } from "../../hoocks/useSesion";
 import { useAlcance } from "../../hoocks/useAlcance";
 
@@ -17,6 +17,7 @@ export function Topbar({ onAbrirMenu }: Props) {
 
   const { usuario,esSuperAdmin, sucursalActiva, regionActiva, cambiarSucursal, cambiarRegion, cerrarSesion } = useSesion();
   const alc = useAlcance();
+  const navigate = useNavigate();
 
   const elegirRegion = (valor: string) => {
     const r = valor ? Number(valor) : null;
@@ -47,7 +48,7 @@ export function Topbar({ onAbrirMenu }: Props) {
 
   // Menú que se abre al hacer clic en el usuario
   const menuUsuario: MenuProps["items"] = [
-    { key: "perfil", label: "Mi perfil", disabled: true },
+     { key: "perfil", label: "Mi perfil", onClick: () => navigate("/perfil") },
     { type: "divider" },
    { key: "salir", label: "Cerrar sesión", danger: true, onClick: salir },
   ];

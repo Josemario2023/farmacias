@@ -18,4 +18,8 @@ export class Usuario {
 
   @Column({ name: "ACTIVO", type: "number", default: 1 })
   activo: number;
+
+   @Column({ name: "CORREO", type: "varchar2", length: 200, nullable: true })
+  correo: string | null;
+
 }

@@ -76,6 +76,10 @@ const CAMPOS: Record<string, string> = {
   usuarioId: "Usuario",
   sucursal_id: "Sucursal",
   sucursalId: "Sucursal",
+  sucursal_origen_id: "Sucursal origen",
+  sucursal_destino_id: "Sucursal destino",
+  sucursalOrigenId: "Sucursal origen",
+  sucursalDestinoId: "Sucursal destino",
   lote_id: "Lote",
   numero_lote: "Número de lote",
   numeroLote: "Número de lote",
@@ -187,6 +191,7 @@ export function traducirValor(
   // Si el campo es un ID conocido, buscar su nombre
    if (["usuario", "solicitó", "autorizó", "recibió"].includes(c)) return cat.usuario(valor);
   if (c === "sucursal") return cat.sucursal(valor);
+  if (c === "sucursal origen" || c === "sucursal destino") return cat.sucursal(valor);
   if (c === "región" || c === "region") return cat.region(valor);
   if (c === "producto") return cat.producto(valor);
   if (c === "lote") return cat.lote(valor);

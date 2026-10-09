@@ -19,8 +19,7 @@ export function CredencialesForm({ onSubmit, cargando }: Props) {
     <form className="loginbox" onSubmit={enviar}>
       <h2>Inicia sesión</h2>
       <p className="sub">
-        Ingresa con tu cuenta al sistema de Farmacias Batres. El alcance (región y sucursal)
-        se determina por tu usuario.
+        Ingresa con tu cuenta al sistema de Farmacias Batres. 
       </p>
 
       <div className="field">
@@ -29,7 +28,7 @@ export function CredencialesForm({ onSubmit, cargando }: Props) {
           id="usuario"
           type="text"
           required
-          placeholder="admin"
+          placeholder="user"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           autoComplete="username"

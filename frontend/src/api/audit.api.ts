@@ -114,3 +114,8 @@ export async function cajaDetalle(desde: string, hasta: string) {
     diferencia: number;
   }[];
 }
+
+export async function cambiarPassword(passwordActual: string, passwordNueva: string) {
+  const { data } = await api.post("/auth/cambiar-password", { passwordActual, passwordNueva });
+  return data as { mensaje: string };
+}

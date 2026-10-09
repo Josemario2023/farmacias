@@ -36,11 +36,11 @@ export function UsuarioModal({ abierto, onCerrar, onListo, editar }: Props & { e
       setGuardando(true);
       if (esEdicion) {
         // Al editar, la contrasena solo se manda si el usuario escribio una nueva
-        const dto: any = { nombre: v.nombre, activo: v.activo === false ? 0 : 1 };
+         const dto: any = { nombre: v.nombre, correo: v.correo, activo: v.activo === false ? 0 : 1 };
         if (v.password) dto.password = v.password;
         await actualizarUsuario(editar!.usuarioId, dto);
       } else {
-        await crearUsuario({ username: v.username, password: v.password, nombre: v.nombre });
+         await crearUsuario({ username: v.username, password: v.password, nombre: v.nombre, correo: v.correo });
       }
       message.success(esEdicion ? "Usuario actualizado" : "Usuario creado");
       onListo();
@@ -66,6 +66,14 @@ export function UsuarioModal({ abierto, onCerrar, onListo, editar }: Props & { e
         <Form.Item name="nombre" label="Nombre completo"
                    rules={[{ required: true, message: "Escribe el nombre" }]}>
           <Input placeholder="Ej. Ana Morales" maxLength={150} />
+        </Form.Item>
+         <Form.Item name="correo" label="Correo electrónico"
+                   rules={[
+                     { required: true, message: "Escribe el correo" },
+                     { type: "email", message: "El correo no es válido" },
+                   ]}
+                   extra="Aquí se enviará el código de verificación al iniciar sesión">
+          <Input placeholder="Ej. ana@correo.com" maxLength={200} />
         </Form.Item>
 
         <Form.Item name="password"

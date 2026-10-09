@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsIn, MinLength, MaxLength } from "class-validator";
+import { IsString, IsOptional, IsIn, MinLength, MaxLength, IsEmail } from "class-validator";
 
 // Valida los datos para EDITAR un usuario (todo opcional)
 export class UpdateUsuarioDto {
@@ -16,4 +16,10 @@ export class UpdateUsuarioDto {
   @IsOptional()
   @IsIn([0, 1], { message: "activo debe ser 0 o 1" })
   activo?: number;
+
+
+  @IsOptional()
+  @IsEmail({}, { message: "El correo no tiene un formato valido" })
+  @MaxLength(200)
+  correo?: string;
 }

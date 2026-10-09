@@ -1,4 +1,4 @@
-﻿import { Injectable, UnauthorizedException } from "@nestjs/common";
+﻿import { Injectable, UnauthorizedException,BadRequestException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { InjectRepository, InjectDataSource } from "@nestjs/typeorm";
 import { Repository, DataSource } from "typeorm";
@@ -29,6 +29,7 @@ export class AuthService {
         passwordHash: true,
         nombre: true,
         activo: true,
+        correo: true,
       },
     });
     if (!usuario) {
@@ -46,10 +47,14 @@ export class AuthService {
     }
 
     const codigo = await this.otpService.generar(usuario.usuarioId);
-    const correo = username + "@farmacias.local";
+    const correo = usuario.correo?.trim() || username + "@farmacias.local";
     await this.mailService.enviarOtp(correo, codigo);
 
-    return { mensaje: "Codigo de verificacion enviado a tu correo. Revisa Mailhog." };
+     return { mensaje: "Codigo de verificacion enviado a " + this.ocultarCorreo(correo) };
+  }
+  private ocultarCorreo(correo: string): string {
+    const [nombre, dominio] = correo.split("@");
+    return nombre.charAt(0) + "***@" + dominio;
   }
 
   // PASO 2: valida el OTP y devuelve el token CON la identidad completa
@@ -143,6 +148,28 @@ export class AuthService {
       permisos: permisos.map((p: any) => p.codigo),
     };
   }
+  async cambiarPassword(usuarioId: number, actual: string, nueva: string): Promise<{ mensaje: string }> {
+    const usuario = await this.usuarioRepo.findOne({
+      where: { usuarioId },
+      select: { usuarioId: true, passwordHash: true, activo: true },
+    });
+    if (!usuario || usuario.activo !== 1) {
+      throw new UnauthorizedException("Usuario no encontrado");
+    }
+
+    const correcta = await bcrypt.compare(actual, usuario.passwordHash);
+    if (!correcta) {
+      throw new BadRequestException("La contraseña actual no es correcta");
+    }
+    if (actual === nueva) {
+      throw new BadRequestException("La contraseña nueva debe ser distinta de la actual");
+    }
+
+    await this.usuarioRepo.update(usuarioId, { passwordHash: await bcrypt.hash(nueva, 10) });
+    return { mensaje: "Contraseña actualizada" };
+  }
+
+
 
   // Endpoint para que el frontend sepa quien esta en sesion
   async perfilDesdeToken(usuarioId: number): Promise<any> {

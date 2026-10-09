@@ -2,6 +2,7 @@
 import type { Response, Request } from "express";
 import { AuthService } from "./auth.service";
 import { COOKIE_NOMBRE, COOKIE_BASE, COOKIE_SESION } from "./cookie.config";
+import { CambiarPasswordDto } from "./cambiar-password.dto";
 
 @Controller("auth")
 export class AuthController {
@@ -37,6 +38,13 @@ export class AuthController {
     return this.authService.perfilDesdeToken(usuarioId);
   }
 
+  
+   @Post("cambiar-password")
+  cambiarPassword(@Req() req: Request, @Body() dto: CambiarPasswordDto) {
+    const usuarioId = Number(req.headers["x-usuario-id"]);
+    if (!usuarioId) throw new UnauthorizedException("No autenticado");
+    return this.authService.cambiarPassword(usuarioId, dto.passwordActual, dto.passwordNueva);
+  }
   @Post("logout")
   logout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie(COOKIE_NOMBRE, COOKIE_BASE);

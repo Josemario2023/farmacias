@@ -99,6 +99,7 @@ export function AdminPage() {
         columns={[
           { title: "Usuario", dataIndex: "username", width: 140 },
           { title: "Nombre", dataIndex: "nombre" },
+          { title: "Correo", dataIndex: "correo", render: (c: string | null) => c ?? <span className="muted">Sin correo</span> },
           { title: "Roles", width: 230,
             render: (_, u: Usuario) => {
               const rs = rolesPorUsuario[u.usuarioId] ?? [];

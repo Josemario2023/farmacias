@@ -22,6 +22,7 @@ export interface Usuario {
   usuarioId: number;
   username: string;
   nombre: string;
+  correo?: string | null;
   activo: number;
 }
 
@@ -69,7 +70,7 @@ export const obtenerUsuarios = async (): Promise<Usuario[]> =>
   (await api.get("/usuarios")).data;
 
 export const crearUsuario = async (dto: {
-  username: string; password: string; nombre: string;
+  username: string; password: string; nombre: string; correo: string;
 }) => (await api.post("/usuarios", dto)).data;
 
 export const actualizarUsuario = async (id: number, dto: any) =>

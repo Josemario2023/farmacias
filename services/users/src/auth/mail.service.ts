@@ -8,10 +8,14 @@ export class MailService {
 
   constructor(private readonly config: ConfigService) {
     // Configura el "transportador" que envia correos, apuntando a Mailhog
+    const smtpUser = this.config.get<string>("SMTP_USER");
     this.transporter = nodemailer.createTransport({
       host: this.config.get<string>("SMTP_HOST"),
       port: Number(this.config.get<string>("SMTP_PORT")),
-      secure: false,   // Mailhog no usa TLS
+      secure: this.config.get<string>("SMTP_SECURE") === "true",
+      auth: smtpUser
+        ? { user: smtpUser, pass: this.config.get<string>("SMTP_PASS") }
+        : undefined,
     });
   }
 

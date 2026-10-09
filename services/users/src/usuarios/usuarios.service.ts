@@ -33,11 +33,17 @@ export class UsuariosService {
     if (existe) {
       throw new ConflictException("Ya existe el usuario " + dto.username);
     }
+    const correo = dto.correo.trim().toLowerCase();
+    const correoUsado = await this.usuarioRepo.findOne({ where: { correo } });
+    if (correoUsado) {
+      throw new ConflictException("Ya existe un usuario con el correo " + correo);
+    }
     const passwordHash = await bcrypt.hash(dto.password, 10);
     const usuario = this.usuarioRepo.create({
       username: dto.username,
       passwordHash: passwordHash,
       nombre: dto.nombre,
+      correo: correo,
       activo: 1,
     });
     const guardado = await this.usuarioRepo.save(usuario);
@@ -52,6 +58,14 @@ export class UsuariosService {
 
     if (dto.nombre !== undefined) usuario.nombre = dto.nombre;
     if (dto.activo !== undefined) usuario.activo = dto.activo;
+    if (dto.correo !== undefined) {
+      const correo = dto.correo.trim().toLowerCase();
+      const otro = await this.usuarioRepo.findOne({ where: { correo } });
+      if (otro && otro.usuarioId !== id) {
+        throw new ConflictException("Ya existe un usuario con el correo " + correo);
+      }
+      usuario.correo = correo;
+    }
     if (dto.password) {
       usuario.passwordHash = await bcrypt.hash(dto.password, 10);
     }

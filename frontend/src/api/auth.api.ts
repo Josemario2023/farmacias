@@ -36,3 +36,8 @@ export async function obtenerPerfil(): Promise<PerfilUsuario | null> {
   return data;
 }
 
+export async function cambiarPassword(passwordActual: string, passwordNueva: string) {
+  const { data } = await api.post("/auth/cambiar-password", { passwordActual, passwordNueva });
+  return data as { mensaje: string };
+}
+
